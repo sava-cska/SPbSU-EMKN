@@ -1,6 +1,6 @@
 package server
 
-import "github.com/sava-cska/SPbSU-Calculator/internal/app/storage"
+import "github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 
 type Config struct {
 	BindAddress string `toml:"bind_address"`

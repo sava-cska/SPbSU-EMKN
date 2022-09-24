@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/sava-cska/SPbSU-Calculator/internal/app/actions/evaluations"
-	"github.com/sava-cska/SPbSU-Calculator/internal/app/storage"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/evaluations"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -64,4 +65,5 @@ func (server *Server) configureStorage() error {
 func (server *Server) configureRouter() {
 	server.router.HandleFunc("/evaluations/list", evaluations.HandleEvaluationsList(server.logger, server.storage))
 	server.router.HandleFunc("/evaluations/calculate", evaluations.HandleEvaluationsCalculate(server.logger, server.storage))
+	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage))
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/BurntSushi/toml"
-	server "github.com/sava-cska/SPbSU-Calculator/internal/app"
+	server "github.com/sava-cska/SPbSU-EMKN/internal/app"
 	"log"
 )
 

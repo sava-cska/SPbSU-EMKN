@@ -2,10 +2,10 @@ package evaluations
 
 import (
 	"encoding/json"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"net/http"
 
-	"github.com/sava-cska/SPbSU-Calculator/internal/app/storage"
-	"github.com/sava-cska/SPbSU-Calculator/internal/utils"
 	"github.com/sirupsen/logrus"
 )
 

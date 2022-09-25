@@ -24,7 +24,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		illegalLogin
 	)
 
-	validate := func(request RegisterRequest) (int, *RegisterErrors) {
+	validate := func(request *RegisterRequest) (int, *RegisterErrors) {
 		if len(request.Login) <= 4 || len(request.Login) >= 15 {
 			return http.StatusBadRequest, &RegisterErrors{
 				IllegalLogin: &Error{Code: illegalLogin},
@@ -54,17 +54,15 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		return code.String()
 	}
 
-	handleAccountsRegister := func(request RegisterRequest) (int, RegisterResponse) {
+	handleAccountsRegister := func(request *RegisterRequest) (int, *RegisterResponse) {
 		if code, errors := validate(request); errors != nil {
-			return code, RegisterResponse{
-				Errors:   *errors,
-				Response: WrapResponse{},
+			return code, &RegisterResponse{
+				Errors: errors,
 			}
 		}
 		if storage.UserDao().Exists(logger, request.Login) {
-			return http.StatusBadRequest, RegisterResponse{
-				Errors:   RegisterErrors{LoginIsNotAvailable: &Error{Code: loginIsNotAvailable}},
-				Response: WrapResponse{},
+			return http.StatusBadRequest, &RegisterResponse{
+				Errors: &RegisterErrors{LoginIsNotAvailable: &Error{Code: loginIsNotAvailable}},
 			}
 		}
 		token := generateToken()
@@ -81,8 +79,8 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 
 		utils.SendEmail(request.Email)
 
-		return http.StatusOK, RegisterResponse{
-			Response: WrapResponse{
+		return http.StatusOK, &RegisterResponse{
+			Response: &WrapResponse{
 				RandomToken: token,
 				ExpiresIn:   strconv.Itoa(int(expireIn.Seconds())),
 			},
@@ -100,7 +98,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 			return
 		}
 
-		code, resp := handleAccountsRegister(registerRequest)
+		code, resp := handleAccountsRegister(&registerRequest)
 		writer.WriteHeader(code)
 
 		respJSON, errRespJSON := json.Marshal(resp)

@@ -11,11 +11,11 @@ type RegisterErrors struct {
 }
 
 type WrapResponse struct {
-	RandomToken string `json:"random_token"`
-	ExpiresIn   string `json:"expires_in"`
+	RandomToken string `json:"random_token,omitempty"`
+	ExpiresIn   string `json:"expires_in,omitempty"`
 }
 
 type RegisterResponse struct {
-	Errors   RegisterErrors `json:"errors,omitempty"`
-	Response WrapResponse   `json:"response"`
+	Errors   *RegisterErrors `json:"errors,omitempty"`
+	Response *WrapResponse   `json:"response,omitempty"`
 }

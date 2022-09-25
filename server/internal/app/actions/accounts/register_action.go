@@ -1,52 +1,115 @@
 package accounts
 
 import (
+	"encoding/hex"
 	"encoding/json"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	handleAccountsRegister := func(request RegisterRequest) RegisterResponse {
-		errors := make([]actions.Error, 0)
-		r := rand.Float32()
-		switch {
-		case 0 <= r && r <= 0.2:
-			errors = append(errors, actions.Error{Code: actions.IllegalEmail})
-		case 0.2 < r && r <= 0.4:
-			errors = append(errors, actions.Error{Code: actions.LoginIsNotAvailable})
-		case 0.4 < r && r <= 0.6:
-			errors = append(errors, actions.Error{Code: actions.IllegalPassword})
+	expireIn := 60 * time.Second
+	verificationCodeLength := 6
+	tokenLength := 20
+
+	const (
+		loginIsNotAvailable int = iota
+		illegalPassword
+		illegalLogin
+	)
+
+	validate := func(request RegisterRequest) (int, *RegisterErrors) {
+		if len(request.Login) <= 4 || len(request.Login) >= 15 {
+			return http.StatusBadRequest, &RegisterErrors{
+				IllegalLogin: &Error{Code: illegalLogin},
+			}
 		}
-		return RegisterResponse{
-			EmknResponse: actions.EmknResponse{
-				Errors: errors,
+		if len(request.Password) <= 5 || len(request.Password) >= 21 {
+			return http.StatusBadRequest, &RegisterErrors{
+				IllegalPassword: &Error{Code: illegalPassword},
+			}
+		}
+		return http.StatusOK, nil
+	}
+
+	generateToken := func() string {
+		b := make([]byte, tokenLength)
+		if _, err := rand.Read(b); err != nil {
+			return ""
+		}
+		return hex.EncodeToString(b)
+	}
+
+	generateVerificationCode := func() string {
+		code := strings.Builder{}
+		for i := 0; i < verificationCodeLength; i++ {
+			code.WriteString(strconv.Itoa(rand.Intn(10)))
+		}
+		return code.String()
+	}
+
+	handleAccountsRegister := func(request RegisterRequest) (int, RegisterResponse) {
+		if code, errors := validate(request); errors != nil {
+			return code, RegisterResponse{
+				Errors:   *errors,
+				Response: WrapResponse{},
+			}
+		}
+		if storage.UserDao().Exists(logger, request.Login) {
+			return http.StatusBadRequest, RegisterResponse{
+				Errors:   RegisterErrors{LoginIsNotAvailable: &Error{Code: loginIsNotAvailable}},
+				Response: WrapResponse{},
+			}
+		}
+		token := generateToken()
+		_ = storage.RegistrationDao().Upsert(
+			token,
+			request.Login,
+			request.Password,
+			request.Email,
+			request.FirstName,
+			request.LastName,
+			time.Now().Add(expireIn),
+			generateVerificationCode(),
+		)
+
+		utils.SendEmail(request.Email)
+
+		return http.StatusOK, RegisterResponse{
+			Response: WrapResponse{
+				RandomToken: token,
+				ExpiresIn:   strconv.Itoa(int(expireIn.Seconds())),
 			},
-			RandomToken: strconv.Itoa(rand.Int()),
-			ExpiresIn:   "150",
 		}
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsRegister - Called URI %s", request.RequestURI)
 
 		var registerRequest RegisterRequest
-		if errJSON := utils.ParseBody(logger, interface{}(&registerRequest), writer, request); errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse Calculate query", errJSON)
+		if errJSON := utils.ParseBody(interface{}(&registerRequest), request); errJSON != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = writer.Write([]byte("Can't parse query"))
 			return
 		}
 
-		respJSON, errRespJSON := json.Marshal(handleAccountsRegister(registerRequest))
+		code, resp := handleAccountsRegister(registerRequest)
+		writer.WriteHeader(code)
+
+		respJSON, errRespJSON := json.Marshal(resp)
 		if errRespJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errRespJSON)
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = writer.Write([]byte("Can't create JSON object from data."))
 			return
 		}
 
-		writer.Write(respJSON)
+		_, _ = writer.Write(respJSON)
 	}
 }

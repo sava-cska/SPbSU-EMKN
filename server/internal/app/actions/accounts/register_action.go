@@ -60,7 +60,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 				Errors: errors,
 			}
 		}
-		if storage.UserDao().Exists(logger, request.Login) {
+		if storage.UserDao().Exists(request.Login) {
 			return http.StatusBadRequest, &RegisterResponse{
 				Errors: &RegisterErrors{LoginIsNotAvailable: &Error{Code: loginIsNotAvailable}},
 			}
@@ -78,7 +78,9 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 			verificationCode,
 		)
 
-		utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName)
+		if err := utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName); err != nil {
+			return http.StatusInternalServerError, &RegisterResponse{}
+		}
 
 		return http.StatusOK, &RegisterResponse{
 			Response: &WrapResponse{

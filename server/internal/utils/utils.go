@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/smtp"
 	"os"
@@ -23,7 +22,7 @@ func ParseBody(value any, request *http.Request) error {
 	return nil
 }
 
-func SendEmail(email, verificationCode, firstName, lastName string) {
+func SendEmail(email, verificationCode, firstName, lastName string) error {
 	from := os.Getenv("EMKN_COURSE_MAIL")
 	password := os.Getenv("EMKN_COURSE_PASSWORD")
 
@@ -40,8 +39,5 @@ func SendEmail(email, verificationCode, firstName, lastName string) {
 				verificationCode)))
 
 	auth := smtp.PlainAuth("", from, password, "smtp.yandex.ru")
-	err := smtp.SendMail("smtp.yandex.ru:25", auth, from, []string{email}, []byte(msg))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return smtp.SendMail("smtp.yandex.ru:25", auth, from, []string{email}, []byte(msg))
 }

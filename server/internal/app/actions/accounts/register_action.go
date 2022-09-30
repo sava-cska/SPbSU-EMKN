@@ -66,6 +66,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 			}
 		}
 		token := generateToken()
+		verificationCode := generateVerificationCode()
 		_ = storage.RegistrationDao().Upsert(
 			token,
 			request.Login,
@@ -74,10 +75,10 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 			request.FirstName,
 			request.LastName,
 			time.Now().Add(expireIn),
-			generateVerificationCode(),
+			verificationCode,
 		)
 
-		utils.SendEmail(request.Email)
+		utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName)
 
 		return http.StatusOK, &RegisterResponse{
 			Response: &WrapResponse{

@@ -22,6 +22,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		loginIsNotAvailable int = iota
 		illegalPassword
 		illegalLogin
+		illegalEmail
 	)
 
 	validate := func(request *RegisterRequest) (int, *RegisterErrors) {
@@ -79,7 +80,9 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		)
 
 		if err := utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName); err != nil {
-			return http.StatusInternalServerError, &RegisterResponse{}
+			return http.StatusBadRequest, &RegisterResponse{
+				Errors: &RegisterErrors{IllegalEmail: &Error{Code: illegalEmail}},
+			}
 		}
 
 		return http.StatusOK, &RegisterResponse{

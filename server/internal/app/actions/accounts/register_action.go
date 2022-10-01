@@ -25,12 +25,12 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 	)
 
 	validate := func(request *RegisterRequest) (int, *RegisterErrors) {
-		if len(request.Login) <= 4 || len(request.Login) >= 15 {
+		if len(request.Login) == 0 {
 			return http.StatusBadRequest, &RegisterErrors{
 				IllegalLogin: &Error{Code: illegalLogin},
 			}
 		}
-		if len(request.Password) <= 5 || len(request.Password) >= 21 {
+		if len(request.Password) == 0 {
 			return http.StatusBadRequest, &RegisterErrors{
 				IllegalPassword: &Error{Code: illegalPassword},
 			}

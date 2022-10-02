@@ -84,6 +84,7 @@ func (server *Server) configureRouter() {
 	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage, server.mailer))
 	server.router.HandleFunc("/accounts/validate_email", accounts.HandleAccountsValidateEmail(server.logger, server.storage))
 	server.router.HandleFunc("/accounts/login", accounts.HandleAccountsLogin(server.logger, server.storage))
+	server.router.HandleFunc("accounts/validate_change_password", accounts.HandleValidateChangePassword(server.logger, server.storage))
 }
 
 // used before all handlers that require user authorization

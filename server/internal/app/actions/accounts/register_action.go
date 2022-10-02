@@ -3,14 +3,15 @@ package accounts
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {

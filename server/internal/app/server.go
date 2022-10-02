@@ -1,11 +1,12 @@
 package server
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"

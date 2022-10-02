@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
+	"log"
+
 	"github.com/BurntSushi/toml"
 	server "github.com/sava-cska/SPbSU-EMKN/internal/app"
-	"log"
 )
 
 var (

@@ -6,9 +6,10 @@ import (
 )
 
 type Storage struct {
-	config         *Config
-	db             *sql.DB
-	evaluationsDao *EvaluationsDAO
+	config          *Config
+	Db              *sql.DB
+	userDao         *UserDAO
+	registrationDao *RegistrationDao
 }
 
 func New(config *Config) *Storage {
@@ -25,15 +26,23 @@ func (storage *Storage) Open() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
-	storage.db = db
+	storage.Db = db
 	return nil
 }
-
-func (storage *Storage) Evaluations() *EvaluationsDAO {
-	if storage.evaluationsDao == nil {
-		storage.evaluationsDao = &EvaluationsDAO{
-			storage: storage,
+func (storage *Storage) UserDao() *UserDAO {
+	if storage.userDao == nil {
+		storage.userDao = &UserDAO{
+			Storage: storage,
 		}
 	}
-	return storage.evaluationsDao
+	return storage.userDao
+}
+
+func (storage *Storage) RegistrationDao() *RegistrationDao {
+	if storage.registrationDao == nil {
+		storage.registrationDao = &RegistrationDao{
+			Storage: storage,
+		}
+	}
+	return storage.registrationDao
 }

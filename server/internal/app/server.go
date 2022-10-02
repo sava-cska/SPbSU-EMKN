@@ -2,9 +2,10 @@ package server
 
 import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/evaluations"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -26,6 +27,7 @@ func New(config *Config) *Server {
 }
 
 func (server *Server) Start() error {
+	rand.Seed(time.Now().UnixNano())
 	if err := server.configureLogger(); err != nil {
 		return err
 	}
@@ -63,7 +65,5 @@ func (server *Server) configureStorage() error {
 }
 
 func (server *Server) configureRouter() {
-	server.router.HandleFunc("/evaluations/list", evaluations.HandleEvaluationsList(server.logger, server.storage))
-	server.router.HandleFunc("/evaluations/calculate", evaluations.HandleEvaluationsCalculate(server.logger, server.storage))
 	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage))
 }

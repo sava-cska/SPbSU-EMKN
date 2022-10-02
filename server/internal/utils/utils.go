@@ -1,35 +1,43 @@
 package utils
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/sirupsen/logrus"
+	"net/smtp"
+	"os"
 )
 
-func HandleError(logger *logrus.Logger, writer http.ResponseWriter, code int, reason string, err error) {
-	errText := ""
-	if err != nil {
-		errText = fmt.Sprint(err)
-	}
-	logger.Error(reason, errText)
-	writer.WriteHeader(code)
-	writer.Write([]byte(reason))
-}
-
-func ParseBody(logger *logrus.Logger, value any, writer http.ResponseWriter, request *http.Request) error {
+func ParseBody(value any, request *http.Request) error {
 	data, errReq := io.ReadAll(request.Body)
 	if errReq != nil {
-		HandleError(logger, writer, http.StatusBadRequest, "Can't read request body.", errReq)
 		return errReq
 	}
-
 	if errJSON := json.Unmarshal(data, value); errJSON != nil {
-		HandleError(logger, writer, http.StatusBadRequest, "Can't convert body json to correct struct.", errJSON)
 		return errJSON
 	}
 
 	return nil
+}
+
+func SendEmail(email, verificationCode, firstName, lastName string) error {
+	from := os.Getenv("EMKN_COURSE_MAIL")
+	password := os.Getenv("EMKN_COURSE_PASSWORD")
+
+	msg := "To: " + email + "\r\n" +
+		"From: " + from + "\r\n" +
+		"Subject: " + "Код подтверждения" + "\r\n" +
+		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
+		"Content-Transfer-Encoding: base64\r\n" +
+		"\r\n" +
+		base64.StdEncoding.EncodeToString([]byte(
+			fmt.Sprintf("<html><body>Здравствуйте, \"%s %s\"!<br>Код подтверждения: <b>%s</b></body></html>",
+				firstName,
+				lastName,
+				verificationCode)))
+
+	auth := smtp.PlainAuth("", from, password, "smtp.yandex.ru")
+	return smtp.SendMail("smtp.yandex.ru:25", auth, from, []string{email}, []byte(msg))
 }

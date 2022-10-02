@@ -67,4 +67,5 @@ func (server *Server) configureStorage() error {
 
 func (server *Server) configureRouter() {
 	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage))
+	server.router.HandleFunc("/accounts/validate_email", accounts.HandleAccountsValidateEmail(server.logger, server.storage))
 }

@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/smtp"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 func ParseBody(value any, request *http.Request) error {
@@ -20,6 +22,12 @@ func ParseBody(value any, request *http.Request) error {
 	}
 
 	return nil
+}
+
+func HandleError(logger *logrus.Logger, writer http.ResponseWriter, code int, reason string, err error) {
+	logger.Error(reason, err)
+	writer.WriteHeader(code)
+	writer.Write([]byte(reason))
 }
 
 func SendEmail(email, verificationCode, firstName, lastName string) error {

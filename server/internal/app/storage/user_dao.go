@@ -2,6 +2,8 @@ package storage
 
 import (
 	"database/sql"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/users"
 )
 
 type UserDAO struct {
@@ -19,4 +21,11 @@ func (dao *UserDAO) Exists(login string) bool {
 	var tmpLogin string
 	err := row.Scan(&tmpLogin)
 	return err != sql.ErrNoRows
+}
+
+func (dao *UserDAO) AddUser(user *users.User) error {
+	_, err := dao.Storage.Db.Exec(
+		"INSERT INTO user_base (login, password, email, first_name, last_name) VALUES ($1, $2, $3, $4, $5)",
+		user.Login, user.Password, user.Email, user.FirstName, user.LastName)
+	return err
 }

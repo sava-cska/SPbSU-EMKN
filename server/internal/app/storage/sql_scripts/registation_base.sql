@@ -1,5 +1,5 @@
 CREATE TABLE registration_base (
-    token  varchar PRIMARY KEY,
+    token varchar PRIMARY KEY,
     login varchar,
     password varchar,
     email varchar,

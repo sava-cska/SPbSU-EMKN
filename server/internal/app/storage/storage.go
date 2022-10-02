@@ -10,7 +10,7 @@ type Storage struct {
 	config          *Config
 	Db              *sql.DB
 	userDao         *UserDAO
-	registrationDao *RegistrationDao
+	registrationDao *RegistrationDAO
 }
 
 func New(config *Config) *Storage {
@@ -30,7 +30,7 @@ func (storage *Storage) Open() error {
 	storage.Db = db
 	return nil
 }
-func (storage *Storage) UserDao() *UserDAO {
+func (storage *Storage) UserDAO() *UserDAO {
 	if storage.userDao == nil {
 		storage.userDao = &UserDAO{
 			Storage: storage,
@@ -39,9 +39,9 @@ func (storage *Storage) UserDao() *UserDAO {
 	return storage.userDao
 }
 
-func (storage *Storage) RegistrationDao() *RegistrationDao {
+func (storage *Storage) RegistrationDAO() *RegistrationDAO {
 	if storage.registrationDao == nil {
-		storage.registrationDao = &RegistrationDao{
+		storage.registrationDao = &RegistrationDAO{
 			Storage: storage,
 		}
 	}

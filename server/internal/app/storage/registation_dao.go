@@ -2,19 +2,17 @@ package storage
 
 import (
 	"time"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/users"
 )
 
-type RegistrationDao struct {
+type RegistrationDAO struct {
 	Storage *Storage
 }
 
-func (dao *RegistrationDao) Upsert(
+func (dao *RegistrationDAO) Upsert(
 	token string,
-	login string,
-	password string,
-	email string,
-	firstName string,
-	lastName string,
+	user *users.User,
 	expireDate time.Time,
 	verificationCode string,
 ) error {
@@ -23,13 +21,28 @@ func (dao *RegistrationDao) Upsert(
 			"registration_base (token, login, password, email, first_name, last_name, expire_date, verification_code)\n"+
 			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		token,
-		login,
-		password,
-		email,
-		firstName,
-		lastName,
+		user.Login,
+		user.Password,
+		user.Email,
+		user.FirstName,
+		user.LastName,
 		expireDate,
 		verificationCode,
 	)
 	return err
+}
+
+func (dao *RegistrationDAO) FindRegistration(token string) (users.User, time.Time, string, error) {
+	registerRecord := dao.Storage.Db.QueryRow(
+		"SELECT login, password, email, first_name, last_name, expire_date, verification_code\n"+
+			"FROM registration_base WHERE token = $1", token)
+
+	var user users.User
+	var expireTime time.Time
+	var verificationCode string
+	if errScan := registerRecord.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName,
+		&user.LastName, &expireTime, &verificationCode); errScan != nil {
+		return users.User{}, time.Time{}, "", errScan
+	}
+	return user, expireTime, verificationCode, nil
 }

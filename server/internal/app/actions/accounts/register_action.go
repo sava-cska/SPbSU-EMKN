@@ -19,22 +19,15 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 	verificationCodeLength := 6
 	tokenLength := 20
 
-	const (
-		loginIsNotAvailable int = iota
-		illegalPassword
-		illegalLogin
-		illegalEmail
-	)
-
-	validate := func(request *RegisterRequest) (int, *RegisterErrors) {
+	validate := func(request *RegisterRequest) (int, *ErrorsUnion) {
 		if len(request.Login) == 0 {
-			return http.StatusBadRequest, &RegisterErrors{
-				IllegalLogin: &Error{Code: illegalLogin},
+			return http.StatusBadRequest, &ErrorsUnion{
+				IllegalLogin: &Error{},
 			}
 		}
 		if len(request.Password) == 0 {
-			return http.StatusBadRequest, &RegisterErrors{
-				IllegalPassword: &Error{Code: illegalPassword},
+			return http.StatusBadRequest, &ErrorsUnion{
+				IllegalPassword: &Error{},
 			}
 		}
 		return http.StatusOK, nil
@@ -62,32 +55,28 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 				Errors: errors,
 			}
 		}
-		if storage.UserDao().Exists(request.Login) {
+		if storage.UserDAO().Exists(request.Login) {
 			return http.StatusBadRequest, &RegisterResponse{
-				Errors: &RegisterErrors{LoginIsNotAvailable: &Error{Code: loginIsNotAvailable}},
+				Errors: &ErrorsUnion{LoginIsNotAvailable: &Error{}},
 			}
 		}
 		token := generateToken()
 		verificationCode := generateVerificationCode()
-		_ = storage.RegistrationDao().Upsert(
+		storage.RegistrationDAO().Upsert(
 			token,
-			request.Login,
-			request.Password,
-			request.Email,
-			request.FirstName,
-			request.LastName,
+			request,
 			time.Now().Add(expireIn),
 			verificationCode,
 		)
 
 		if err := utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName); err != nil {
 			return http.StatusBadRequest, &RegisterResponse{
-				Errors: &RegisterErrors{IllegalEmail: &Error{Code: illegalEmail}},
+				Errors: &ErrorsUnion{IllegalEmail: &Error{}},
 			}
 		}
 
 		return http.StatusOK, &RegisterResponse{
-			Response: &WrapResponse{
+			Response: &RegisterWrapper{
 				RandomToken: token,
 				ExpiresIn:   strconv.Itoa(int(expireIn.Seconds())),
 			},
@@ -95,26 +84,24 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsRegister - Called URI %s", request.RequestURI)
 
 		var registerRequest RegisterRequest
 		if errJSON := utils.ParseBody(interface{}(&registerRequest), request); errJSON != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			_, _ = writer.Write([]byte("Can't parse query"))
+			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse /accounts/register request.", errJSON)
 			return
 		}
 
 		code, resp := handleAccountsRegister(&registerRequest)
-		writer.WriteHeader(code)
 
 		respJSON, errRespJSON := json.Marshal(resp)
 		if errRespJSON != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			_, _ = writer.Write([]byte("Can't create JSON object from data."))
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errRespJSON)
 			return
 		}
 
-		_, _ = writer.Write(respJSON)
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(code)
+		writer.Write(respJSON)
 	}
 }

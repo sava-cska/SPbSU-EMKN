@@ -33,7 +33,7 @@ func SendEmail(email, verificationCode, firstName, lastName string) error {
 		"Content-Transfer-Encoding: base64\r\n" +
 		"\r\n" +
 		base64.StdEncoding.EncodeToString([]byte(
-			fmt.Sprintf("<html><body>Здравствуйте, %s %s!<br>Код подтверждения: <b>%s</b></body></html>",
+			fmt.Sprintf("<html><body>Здравствуйте, \"%s %s\"!<br>Код подтверждения: <b>%s</b></body></html>",
 				firstName,
 				lastName,
 				verificationCode)))

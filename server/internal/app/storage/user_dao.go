@@ -29,3 +29,18 @@ func (dao *UserDAO) AddUser(user *users.User) error {
 		user.Login, user.Password, user.Email, user.FirstName, user.LastName)
 	return err
 }
+
+func (dao *UserDAO) GetPassword(login string) (string, error) {
+	row := dao.Storage.Db.QueryRow(
+		`SELECT password
+               FROM user_base
+               WHERE login = $1
+    `, login)
+
+	var pwd string
+	err := row.Scan(&pwd)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	return pwd, err
+}

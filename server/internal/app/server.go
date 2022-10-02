@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
@@ -82,4 +83,48 @@ func (server *Server) configureMailing(EmknCourseMail, EmknCoursePassword string
 func (server *Server) configureRouter() {
 	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage, server.mailer))
 	server.router.HandleFunc("/accounts/validate_email", accounts.HandleAccountsValidateEmail(server.logger, server.storage))
+	server.router.HandleFunc("/accounts/login", accounts.HandleAccountsLogin(server.logger, server.storage))
+}
+
+// used before all handlers that require user authorization
+func (server *Server) withAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(response http.ResponseWriter, request *http.Request) {
+		header := request.Header.Get("Authorization")
+		if header == "" {
+			response.WriteHeader(http.StatusUnauthorized)
+			_, _ = response.Write([]byte("Missing authorization header"))
+			return
+		}
+
+		if !strings.HasPrefix(header, "Basic") {
+			response.WriteHeader(http.StatusUnauthorized)
+			_, _ = response.Write([]byte("Unsupported authorization type"))
+			return
+		}
+
+		authHeader := strings.TrimPrefix(header, "Basic ")
+		creds := strings.Split(authHeader, ":")
+		if len(creds) != 2 {
+			response.WriteHeader(http.StatusUnauthorized)
+			_, _ = response.Write([]byte("Wrong authorization format"))
+			return
+		}
+		login := creds[0]
+		passwd := creds[1]
+
+		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.logger, server.storage)
+		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
+			_, _ = response.Write([]byte(err.Error()))
+			return
+		}
+
+		if !isValid {
+			response.WriteHeader(http.StatusUnauthorized)
+			_, _ = response.Write([]byte("Wrong login or password"))
+			return
+		}
+
+		handlerFunc(response, request)
+	}
 }

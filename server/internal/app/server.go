@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"math/rand"
 	"net/http"
 	"os"
@@ -88,44 +89,39 @@ func (server *Server) configureRouter() {
 }
 
 // used before all handlers that require user authorization
-func (server *Server) withAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
-	return func(response http.ResponseWriter, request *http.Request) {
+func (server *Server) withAuth(handlerFunc http.HandlerFunc, logger *logrus.Logger) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
 		header := request.Header.Get("Authorization")
 		if header == "" {
-			response.WriteHeader(http.StatusUnauthorized)
-			_, _ = response.Write([]byte("Missing authorization header"))
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Missing authorization header", nil)
 			return
 		}
 
 		if !strings.HasPrefix(header, "Basic") {
-			response.WriteHeader(http.StatusUnauthorized)
-			_, _ = response.Write([]byte("Unsupported authorization type"))
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Unsupported authorization type", nil)
 			return
 		}
 
 		authHeader := strings.TrimPrefix(header, "Basic ")
 		creds := strings.Split(authHeader, ":")
 		if len(creds) != 2 {
-			response.WriteHeader(http.StatusUnauthorized)
-			_, _ = response.Write([]byte("Wrong authorization format"))
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong authorization format", nil)
 			return
 		}
 		login := creds[0]
 		passwd := creds[1]
 
-		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.logger, server.storage)
+		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.storage)
 		if err != nil {
-			response.WriteHeader(http.StatusInternalServerError)
-			_, _ = response.Write([]byte(err.Error()))
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate credentials", err)
 			return
 		}
 
 		if !isValid {
-			response.WriteHeader(http.StatusUnauthorized)
-			_, _ = response.Write([]byte("Wrong login or password"))
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong login or password", nil)
 			return
 		}
 
-		handlerFunc(response, request)
+		handlerFunc(writer, request)
 	}
 }

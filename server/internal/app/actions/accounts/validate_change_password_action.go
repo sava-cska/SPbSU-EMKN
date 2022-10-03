@@ -16,10 +16,9 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsValidateChangePassword - Called URI %s", request.RequestURI)
 
-		var parsedRequest ValidateChangePasswordRequest
+		var parsedRequest = ValidateChangePasswordRequest{}
 		if err := utils.ParseBody(interface{}(&parsedRequest), request); err != nil {
-			writer.WriteHeader(http.StatusBadRequest)
-			_, _ = writer.Write([]byte("Failed to parse request body"))
+			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to parse request body", err)
 			return
 		}
 
@@ -29,14 +28,14 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 			return
 		}
 		if correctVerificationCode == "" {
-			writer.WriteHeader(http.StatusBadRequest)
-			_, _ = writer.Write([]byte("Failed to find random token"))
+			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to find random token", nil)
 			return
 		}
 
 		errors := validateVerificationCode(correctVerificationCode, parsedRequest.VerificationCode, expiresAt)
 
 		var responseBody ValidateChangePasswordResponse
+		var statusCode int
 		if errors == nil {
 			token := generateToken(20)
 			err = storage.ChangePasswordDao().SetChangePasswordToken(parsedRequest.RandomToken, token)
@@ -47,15 +46,17 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 			responseBody = ValidateChangePasswordResponse{
 				ChangePasswordToken: token,
 			}
-			writer.WriteHeader(http.StatusOK)
+			statusCode = http.StatusOK
 		} else {
 			responseBody = ValidateChangePasswordResponse{
 				Errors: errors,
 			}
-			writer.WriteHeader(http.StatusBadRequest)
+			statusCode = http.StatusBadRequest
 		}
 
+		writer.WriteHeader(statusCode)
 		body, err := json.Marshal(&responseBody)
+		utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to marshal validate change password response", err)
 		_, _ = writer.Write(body)
 	}
 }
@@ -68,24 +69,14 @@ func generateToken(length uint16) string {
 	return hex.EncodeToString(b)
 }
 
-func validateVerificationCode(correctVerificationCode string, verificationCode string, expiresAt *time.Time) *ErrorsUnion{
+func validateVerificationCode(correctVerificationCode string, verificationCode string, expiresAt *time.Time) *ErrorsUnion {
 	if expiresAt.Before(time.Now()) {
-		return &ErrorsUnion{ ChangePasswordExpired: &Error{} }
+		return &ErrorsUnion{ChangePasswordExpired: &Error{}}
 	}
 
 	if correctVerificationCode != verificationCode {
-		return &ErrorsUnion{ InvalidCode: &Error{} }
+		return &ErrorsUnion{InvalidCode: &Error{}}
 	}
 
 	return nil
-}
-
-type ValidateChangePasswordRequest struct {
-	RandomToken string `json:"random_token"`
-	VerificationCode string `json:"verification_code"`
-}
-
-type ValidateChangePasswordResponse struct {
-	ChangePasswordToken string `json:"change_password_token,omitempty"`
-	Errors *ErrorsUnion `json:"errors,omitempty"`
 }

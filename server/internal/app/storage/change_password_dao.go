@@ -16,8 +16,7 @@ func (cpd *ChangePasswordDao) GetVerificationCodeInfo(identificationToken string
 
 	var expiresAt = time.Time{}
 	var verificationCode string
-	err := row.Scan(&verificationCode, &expiresAt)
-	if err != nil {
+	if err := row.Scan(&verificationCode, &expiresAt); err != nil {
 		return "", &expiresAt, err
 	}
 	return verificationCode, &expiresAt, nil

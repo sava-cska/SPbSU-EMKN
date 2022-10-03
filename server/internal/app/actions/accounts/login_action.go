@@ -1,7 +1,7 @@
 package accounts
 
 import (
-	"errors"
+	"fmt"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -13,14 +13,13 @@ func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.H
 		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsLogin - Called URI %s", request.RequestURI)
 
-		var loginRequest loginRequest
+		var loginRequest LoginRequest
 		if err := utils.ParseBody(interface{}(&loginRequest), request); err != nil {
-			writer.WriteHeader(http.StatusBadRequest)
-			_, _ = writer.Write([]byte("Failed to parse request body"))
+			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to parse request body", err)
 			return
 		}
 
-		isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, logger, storage)
+		isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, storage)
 		if err != nil {
 			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate user credentials", err)
 			return
@@ -35,21 +34,10 @@ func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.H
 }
 
 // ValidateUserCredentials returns tuple (is credentials valid, error if internal error happened)
-func ValidateUserCredentials(login string, password string, logger *logrus.Logger, storage *storage.Storage) (bool, error) {
+func ValidateUserCredentials(login string, password string, storage *storage.Storage) (bool, error) {
 	origPassword, err := storage.UserDAO().GetPassword(login)
 	if err != nil {
-		logger.Errorf("Failed to read password for login %s: %s", login, err.Error())
-		return false, errors.New("internal database error")
+		return false, fmt.Errorf("failed to read password for login %s: %s", login, err.Error())
 	}
-
-	if password != origPassword {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-type loginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	return password == origPassword, nil
 }

@@ -12,10 +12,9 @@ type UserDAO struct {
 
 func (dao *UserDAO) Exists(login string) bool {
 	row := dao.Storage.Db.QueryRow(
-		"SELECT\n"+
-			"	login\n"+
-			"FROM user_base\n"+
-			"WHERE login = $1\n",
+		`SELECT login
+			   FROM user_base
+			   WHERE login = $1`,
 		login,
 	)
 	var tmpLogin string
@@ -25,7 +24,8 @@ func (dao *UserDAO) Exists(login string) bool {
 
 func (dao *UserDAO) AddUser(user *users.User) error {
 	_, err := dao.Storage.Db.Exec(
-		"INSERT INTO user_base (login, password, email, first_name, last_name) VALUES ($1, $2, $3, $4, $5)",
+		`INSERT INTO user_base (login, password, email, first_name, last_name)
+               VALUES ($1, $2, $3, $4, $5)`,
 		user.Login, user.Password, user.Email, user.FirstName, user.LastName)
 	return err
 }

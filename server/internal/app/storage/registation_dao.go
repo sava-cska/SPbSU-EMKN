@@ -17,9 +17,9 @@ func (dao *RegistrationDAO) Upsert(
 	verificationCode string,
 ) error {
 	_, err := dao.Storage.Db.Exec(
-		"INSERT INTO\n"+
-			"registration_base (token, login, password, email, first_name, last_name, expire_date, verification_code)\n"+
-			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+		`INSERT INTO
+			   registration_base (token, login, password, email, first_name, last_name, expire_date, verification_code)
+		       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		token,
 		user.Login,
 		user.Password,
@@ -34,8 +34,9 @@ func (dao *RegistrationDAO) Upsert(
 
 func (dao *RegistrationDAO) FindRegistration(token string) (users.User, time.Time, string, error) {
 	registerRecord := dao.Storage.Db.QueryRow(
-		"SELECT login, password, email, first_name, last_name, expire_date, verification_code\n"+
-			"FROM registration_base WHERE token = $1", token)
+		`SELECT login, password, email, first_name, last_name, expire_date, verification_code
+			   FROM registration_base WHERE token = $1`,
+		token)
 
 	var user users.User
 	var expireTime time.Time

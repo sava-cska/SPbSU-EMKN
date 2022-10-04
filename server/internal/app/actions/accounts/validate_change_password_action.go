@@ -3,12 +3,13 @@ package accounts
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
@@ -54,13 +55,14 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 			statusCode = http.StatusBadRequest
 		}
 
-		writer.WriteHeader(statusCode)
 		body, err := json.Marshal(&responseBody)
 		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to marshal validate change password response", err)
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", err)
 			return
 		}
-		_, _ = writer.Write(body)
+
+		writer.WriteHeader(statusCode)
+		writer.Write(body)
 	}
 }
 

@@ -20,7 +20,8 @@ import (
 )
 
 func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
-	expireIn := 60 * time.Second
+	resentCodeIn := 60 * time.Second
+	tokenTTL := 30 * time.Minute
 	verificationCodeLength := 6
 	tokenLength := 20
 
@@ -75,7 +76,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		storage.RegistrationDAO().Upsert(
 			token,
 			request,
-			time.Now().Add(expireIn),
+			time.Now().Add(tokenTTL),
 			verificationCode,
 		)
 
@@ -89,7 +90,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		return http.StatusOK, &RegisterResponse{
 			Response: &RegisterWrapper{
 				RandomToken: token,
-				ExpiresIn:   strconv.Itoa(int(expireIn.Seconds())),
+				ExpiresIn:   strconv.Itoa(int(resentCodeIn.Seconds())),
 			},
 		}
 	}

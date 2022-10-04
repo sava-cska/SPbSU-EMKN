@@ -56,7 +56,10 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 
 		writer.WriteHeader(statusCode)
 		body, err := json.Marshal(&responseBody)
-		utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to marshal validate change password response", err)
+		if err != nil {
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to marshal validate change password response", err)
+			return
+		}
 		_, _ = writer.Write(body)
 	}
 }

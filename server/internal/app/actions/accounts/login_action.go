@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
@@ -26,7 +27,16 @@ func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.H
 		}
 
 		if !isValid {
-			writer.WriteHeader(http.StatusUnauthorized)
+			errors := ErrorsUnion{
+				InvalidLoginOrPassword: &Error{},
+			}
+			body, err := json.Marshal(errors)
+			if err != nil {
+				utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to marshal login response body", err)
+				return
+			}
+			_, _ = writer.Write(body)
+			writer.WriteHeader(http.StatusBadRequest)
 		} else {
 			writer.WriteHeader(http.StatusOK)
 		}

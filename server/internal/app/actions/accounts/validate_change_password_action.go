@@ -13,6 +13,8 @@ import (
 )
 
 func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
+	tokenLength := uint16(20)
+
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsValidateChangePassword - Called URI %s", request.RequestURI)
@@ -38,7 +40,7 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 		var responseBody ValidateChangePasswordResponse
 		var statusCode int
 		if errors == nil {
-			token := generateToken(20)
+			token := generateToken(tokenLength)
 			err = storage.ChangePasswordDao().SetChangePasswordToken(parsedRequest.RandomToken, token)
 			if err != nil {
 				utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to store changePasswordToken", err)

@@ -1,7 +1,6 @@
 package accounts
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -23,7 +22,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 	resentCodeIn := 60 * time.Second
 	tokenTTL := 30 * time.Minute
 	verificationCodeLength := 6
-	tokenLength := 20
+	tokenLength := uint16(20)
 
 	validate := func(request *RegisterRequest) (int, *ErrorsUnion) {
 		if len(request.Login) == 0 {
@@ -44,22 +43,6 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		return http.StatusOK, nil
 	}
 
-	generateToken := func() string {
-		b := make([]byte, tokenLength)
-		if _, err := rand.Read(b); err != nil {
-			return ""
-		}
-		return hex.EncodeToString(b)
-	}
-
-	generateVerificationCode := func() string {
-		code := strings.Builder{}
-		for i := 0; i < verificationCodeLength; i++ {
-			code.WriteString(strconv.Itoa(rand.Intn(10)))
-		}
-		return code.String()
-	}
-
 	handleAccountsRegister := func(request *RegisterRequest) (int, *RegisterResponse) {
 		if code, errors := validate(request); errors != nil {
 			return code, &RegisterResponse{
@@ -71,8 +54,8 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 				Errors: &ErrorsUnion{LoginIsNotAvailable: &Error{}},
 			}
 		}
-		token := generateToken()
-		verificationCode := generateVerificationCode()
+		token := generateToken(tokenLength)
+		verificationCode := generateVerificationCode(verificationCodeLength)
 		storage.RegistrationDAO().Upsert(
 			token,
 			request,
@@ -116,6 +99,14 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		writer.WriteHeader(code)
 		writer.Write(respJSON)
 	}
+}
+
+func generateVerificationCode(verificationCodeLength int) string {
+	code := strings.Builder{}
+	for i := 0; i < verificationCodeLength; i++ {
+		code.WriteString(strconv.Itoa(rand.Intn(10)))
+	}
+	return code.String()
 }
 
 func buildMessage(verificationCode string, firstName string, lastName string) notifier.Message {

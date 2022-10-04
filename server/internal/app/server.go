@@ -3,9 +3,11 @@ package server
 import (
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 
 	"github.com/gorilla/mux"
@@ -17,6 +19,7 @@ type Server struct {
 	logger  *logrus.Logger
 	router  *mux.Router
 	storage *storage.Storage
+	mailer  *notifier.Mailer
 }
 
 func New(config *Config) *Server {
@@ -29,12 +32,18 @@ func New(config *Config) *Server {
 
 func (server *Server) Start() error {
 	rand.Seed(time.Now().UnixNano())
+	EmknCourseMail := os.Getenv("EMKN_COURSE_MAIL")
+	EmknCoursePassword := os.Getenv("EMKN_COURSE_PASSWORD")
+
 	if err := server.configureLogger(); err != nil {
 		return err
 	}
 	if err := server.configureStorage(); err != nil {
 		return err
 	}
+	server.configureMailing(EmknCourseMail, EmknCoursePassword)
+
+	// important to have configured other entities before configure router
 	server.configureRouter()
 	server.logger.Info("Server is up")
 	return http.ListenAndServe(server.config.BindAddress, server.router)
@@ -57,7 +66,7 @@ func configureLogFormatter() *logrus.TextFormatter {
 }
 
 func (server *Server) configureStorage() error {
-	localStorage := storage.New(server.config.Storage)
+	localStorage := storage.New(server.config.StorageConfig)
 	if err := localStorage.Open(); err != nil {
 		return err
 	}
@@ -65,7 +74,12 @@ func (server *Server) configureStorage() error {
 	return nil
 }
 
+func (server *Server) configureMailing(EmknCourseMail, EmknCoursePassword string) {
+	mailer := notifier.New(server.config.NotifierConfig, EmknCourseMail, EmknCoursePassword)
+	server.mailer = mailer
+}
+
 func (server *Server) configureRouter() {
-	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage))
+	server.router.HandleFunc("/accounts/register", accounts.HandleAccountsRegister(server.logger, server.storage, server.mailer))
 	server.router.HandleFunc("/accounts/validate_email", accounts.HandleAccountsValidateEmail(server.logger, server.storage))
 }

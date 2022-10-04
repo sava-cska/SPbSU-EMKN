@@ -3,19 +3,25 @@ package accounts
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"html"
 	"math/rand"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
+
 	"github.com/sirupsen/logrus"
 )
 
-func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	expireIn := 60 * time.Second
+func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
+	resentCodeIn := 60 * time.Second
+	tokenTTL := 30 * time.Minute
 	verificationCodeLength := 6
 	tokenLength := 20
 
@@ -28,6 +34,11 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		if len(request.Password) == 0 {
 			return http.StatusBadRequest, &ErrorsUnion{
 				IllegalPassword: &Error{},
+			}
+		}
+		if _, err := mail.ParseAddress(request.Email); err != nil {
+			return http.StatusBadRequest, &ErrorsUnion{
+				IllegalEmail: &Error{},
 			}
 		}
 		return http.StatusOK, nil
@@ -65,20 +76,21 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		storage.RegistrationDAO().Upsert(
 			token,
 			request,
-			time.Now().Add(expireIn),
+			time.Now().Add(tokenTTL),
 			verificationCode,
 		)
 
-		if err := utils.SendEmail(request.Email, verificationCode, request.FirstName, request.LastName); err != nil {
-			return http.StatusBadRequest, &RegisterResponse{
-				Errors: &ErrorsUnion{IllegalEmail: &Error{}},
+		go func() {
+			err := mailer.SendEmail([]string{request.Email}, buildMessage(verificationCode, request.FirstName, request.LastName))
+			if err != nil {
+				logger.Debugf(err.Error())
 			}
-		}
+		}()
 
 		return http.StatusOK, &RegisterResponse{
 			Response: &RegisterWrapper{
 				RandomToken: token,
-				ExpiresIn:   strconv.Itoa(int(expireIn.Seconds())),
+				ExpiresIn:   strconv.Itoa(int(resentCodeIn.Seconds())),
 			},
 		}
 	}
@@ -103,5 +115,15 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage) htt
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(code)
 		writer.Write(respJSON)
+	}
+}
+
+func buildMessage(verificationCode string, firstName string, lastName string) notifier.Message {
+	return notifier.Message{
+		Subject: "Код подтверждения",
+		Body: fmt.Sprintf("<html><body>Здравствуйте, %s %s!<br>Код подтверждения: <b>%s</b></body></html>",
+			html.EscapeString(firstName),
+			html.EscapeString(lastName),
+			verificationCode),
 	}
 }

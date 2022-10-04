@@ -7,10 +7,11 @@ import (
 )
 
 type Storage struct {
-	config          *Config
-	Db              *sql.DB
-	userDao         *UserDAO
-	registrationDao *RegistrationDAO
+	config            *Config
+	Db                *sql.DB
+	userDao           *UserDAO
+	registrationDao   *RegistrationDAO
+	changePasswordDao *ChangePasswordDao
 }
 
 func New(config *Config) *Storage {
@@ -46,4 +47,13 @@ func (storage *Storage) RegistrationDAO() *RegistrationDAO {
 		}
 	}
 	return storage.registrationDao
+}
+
+func (storage *Storage) ChangePasswordDao() *ChangePasswordDao {
+	if storage.changePasswordDao == nil {
+		storage.changePasswordDao = &ChangePasswordDao{
+			Storage: storage,
+		}
+	}
+	return storage.changePasswordDao
 }

@@ -1,18 +1,22 @@
 package server
 
-import "github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
+)
 
 type Config struct {
-	BindAddress string `toml:"bind_address"`
-	LogLevel    string `toml:"log_level"`
-	Storage     *storage.Config
+	BindAddress    string `toml:"bind_address"`
+	LogLevel       string `toml:"log_level"`
+	StorageConfig  *storage.Config
+	NotifierConfig *notifier.Config
 }
 
-// NewConfig Upsert new instance of config
 func NewConfig() *Config {
 	return &Config{
-		BindAddress: ":8080",
-		LogLevel:    "debug",
-		Storage:     storage.NewConfig(),
+		BindAddress:    ":8080",
+		LogLevel:       "debug",
+		StorageConfig:  storage.NewConfig(),
+		NotifierConfig: notifier.NewConfig(),
 	}
 }

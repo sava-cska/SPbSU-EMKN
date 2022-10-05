@@ -27,6 +27,8 @@ func startChangePassword(logger *logrus.Logger, storage *storage.Storage, mailer
 
 	token := utils.GenerateToken()
 	verificationCode := utils.GenerateVerificationCode()
+	logger.Debugf("Login = %s, email = %s, token = %s, verificationCode = %s", user.Login, user.Email,
+		token, verificationCode)
 
 	go func() {
 		if errEmail := mailer.SendEmail([]string{email}, buildMessage(verificationCode,

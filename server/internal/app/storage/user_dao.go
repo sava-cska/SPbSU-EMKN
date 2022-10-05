@@ -58,3 +58,15 @@ func (dao *UserDAO) GetPassword(login string) (string, error) {
 	}
 	return pwd, err
 }
+
+func (dao *UserDAO) UpdatePassword(login string, newPassword string) error {
+	_, errUpdate := dao.Storage.Db.Exec(
+		`
+			UPDATE user_base
+			SET
+			password = $1
+			WHERE login = $2
+		`,
+		newPassword, login)
+	return errUpdate
+}

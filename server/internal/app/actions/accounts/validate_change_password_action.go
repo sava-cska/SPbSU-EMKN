@@ -36,7 +36,8 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 		var statusCode int
 		if errors == nil {
 			token := utils.GenerateToken()
-			err = storage.ChangePasswordDao().SetChangePasswordToken(parsedRequest.RandomToken, token)
+			err = storage.ChangePasswordDao().SetChangePasswordToken(parsedRequest.RandomToken,
+				time.Now().Add(utils.TokenTTL), token)
 			if err != nil {
 				utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to store changePasswordToken", err)
 				return

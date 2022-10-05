@@ -30,6 +30,20 @@ func (dao *UserDAO) AddUser(user *users.User) error {
 	return err
 }
 
+func (dao *UserDAO) FindUser(email string) (users.User, error) {
+	row := dao.Storage.Db.QueryRow(
+		`
+		SELECT login, password, email, first_name, last_name
+		FROM user_base
+		WHERE email = $1
+		`,
+		email)
+
+	var user users.User
+	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
+	return user, err
+}
+
 func (dao *UserDAO) GetPassword(login string) (string, error) {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT password

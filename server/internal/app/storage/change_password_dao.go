@@ -32,3 +32,14 @@ func (cpd *ChangePasswordDao) SetChangePasswordToken(identificationToken, change
 	)
 	return err
 }
+
+func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime time.Time,
+	verificationCode string) error {
+	_, err := cpd.Storage.Db.Exec(
+		`
+		INSERT INTO change_password_base (token, login, expire_date, verification_code, change_password_token)
+		VALUES ($1, $2, $3, $4, $5)
+		`,
+		token, login, expiredTime, verificationCode, "")
+	return err
+}

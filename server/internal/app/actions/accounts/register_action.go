@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"math/rand"
 	"net/http"
 	"net/mail"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
@@ -19,11 +17,6 @@ import (
 )
 
 func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
-	resentCodeIn := 60 * time.Second
-	tokenTTL := 30 * time.Minute
-	verificationCodeLength := 6
-	tokenLength := uint16(20)
-
 	validate := func(request *RegisterRequest) (int, *ErrorsUnion) {
 		if len(request.Login) == 0 {
 			return http.StatusBadRequest, &ErrorsUnion{
@@ -54,26 +47,27 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 				Errors: &ErrorsUnion{LoginIsNotAvailable: &Error{}},
 			}
 		}
-		token := generateToken(tokenLength)
-		verificationCode := generateVerificationCode(verificationCodeLength)
+
+		token := utils.GenerateToken()
+		verificationCode := utils.GenerateVerificationCode()
 		storage.RegistrationDAO().Upsert(
 			token,
 			request,
-			time.Now().Add(tokenTTL),
+			time.Now().Add(utils.TokenTTL),
 			verificationCode,
 		)
 
 		go func() {
 			err := mailer.SendEmail([]string{request.Email}, buildMessage(verificationCode, request.FirstName, request.LastName))
 			if err != nil {
-				logger.Debugf(err.Error())
+				logger.Error("Can't send email to %s, %s", request.Email, err.Error())
 			}
 		}()
 
 		return http.StatusOK, &RegisterResponse{
 			Response: &RegisterWrapper{
 				RandomToken: token,
-				ExpiresIn:   strconv.Itoa(int(resentCodeIn.Seconds())),
+				ExpiresIn:   strconv.Itoa(int(utils.ResentCodeIn.Seconds())),
 			},
 		}
 	}
@@ -99,14 +93,6 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		writer.WriteHeader(code)
 		writer.Write(respJSON)
 	}
-}
-
-func generateVerificationCode(verificationCodeLength int) string {
-	code := strings.Builder{}
-	for i := 0; i < verificationCodeLength; i++ {
-		code.WriteString(strconv.Itoa(rand.Intn(10)))
-	}
-	return code.String()
 }
 
 func buildMessage(verificationCode string, firstName string, lastName string) notifier.Message {

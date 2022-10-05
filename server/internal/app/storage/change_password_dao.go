@@ -22,12 +22,16 @@ func (cpd *ChangePasswordDao) GetVerificationCodeInfo(identificationToken string
 }
 
 // SetChangePasswordToken remembers changePasswordToken for identificationToken issued in accounts/begin_change_password
-func (cpd *ChangePasswordDao) SetChangePasswordToken(identificationToken, changePasswordToken string) error {
+func (cpd *ChangePasswordDao) SetChangePasswordToken(identificationToken string, changeTime time.Time,
+	changePasswordToken string) error {
 	_, err := cpd.Storage.Db.Exec(
 		`UPDATE change_password_base 
-	           SET change_password_token = $1
-	           WHERE token = $2`,
+	           SET
+			   change_password_token = $1
+			   change_password_expire_time = $2
+	           WHERE token = $3`,
 		changePasswordToken,
+		changeTime,
 		identificationToken,
 	)
 	return err
@@ -37,9 +41,27 @@ func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime tim
 	verificationCode string) error {
 	_, err := cpd.Storage.Db.Exec(
 		`
-		INSERT INTO change_password_base (token, login, expire_date, verification_code, change_password_token)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO change_password_base
+		(token, login, expire_date, verification_code, change_password_token, change_password_expire_time)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		`,
-		token, login, expiredTime, verificationCode, "")
+		token, login, expiredTime, verificationCode, "", time.Time{})
 	return err
+}
+
+func (cpd *ChangePasswordDao) FindPwdToken(changePwdToken string) (string, time.Time, error) {
+	changePwdRecord := cpd.Storage.Db.QueryRow(
+		`
+		SELECT login, change_password_expire_time
+		FROM change_password_base
+		WHERE change_password_token = $1
+		`,
+		changePwdToken)
+
+	var login string
+	var expiredTime time.Time
+	if errScan := changePwdRecord.Scan(&login, &expiredTime); errScan != nil {
+		return "", time.Time{}, errScan
+	}
+	return login, expiredTime, nil
 }

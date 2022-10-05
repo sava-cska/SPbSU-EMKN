@@ -1,6 +1,9 @@
 package storage
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type ChangePasswordDao struct {
 	Storage *Storage
@@ -47,6 +50,25 @@ func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime tim
 		`,
 		token, login, expiredTime, verificationCode, token, time.Time{})
 	return err
+}
+
+func (cpd *ChangePasswordDao) UpdateVerificationCode(token string, newVerificationCode string) (string, bool, error) {
+	res := cpd.Storage.Db.QueryRow(
+		`UPDATE change_password_base
+               SET verification_code = $1
+               WHERE token = $2
+               RETURNING login`,
+		newVerificationCode, token,
+	)
+	login := ""
+	if err := res.Scan(&login); err != nil {
+		if err == sql.ErrNoRows {
+			return "", false, nil
+		} else {
+			return "", false, err
+		}
+	}
+	return login, true, nil
 }
 
 func (cpd *ChangePasswordDao) FindPwdToken(changePwdToken string) (string, time.Time, error) {

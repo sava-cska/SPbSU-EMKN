@@ -97,6 +97,8 @@ func (server *Server) configureRouter() {
 		accounts.HandleAccountsCommitPwdChange(server.logger, server.storage))
 	server.router.HandleFunc("/accounts/revalidate_registration_credentials",
 		accounts.HandleAccountsRevalidateRegistrationCredentials(server.logger, server.storage, server.mailer))
+	server.router.HandleFunc("/accounts/revalidate_change_password_credentials",
+		accounts.HandleRevalidateChangePasswordCredentials(server.logger, server.storage, server.mailer))
 }
 
 // used before all handlers that require user authorization

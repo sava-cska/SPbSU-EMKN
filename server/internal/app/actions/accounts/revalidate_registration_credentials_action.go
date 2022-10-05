@@ -2,21 +2,17 @@ package accounts
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
-	resentCodeIn := 60 * time.Second
-	tokenTTL := 30 * time.Minute
-	verificationCodeLength := 6
-	tokenLength := uint16(20)
-
 	handleAccountsRevalidateRegistrationCredentials :=
 		func(request *RevalidateRegistrationCredentialsRequest) (int, *RevalidateRegistrationCredentialsResponse) {
 			user, _, _, err := storage.RegistrationDAO().FindRegistrationAndDelete(request.Token)
@@ -28,12 +24,12 @@ func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, stor
 					InvalidRegistrationRevalidation: &Error{}},
 				}
 			}
-			token := generateToken(tokenLength)
-			verificationCode := generateVerificationCode(verificationCodeLength)
+			token := utils.GenerateToken()
+			verificationCode := utils.GenerateVerificationCode()
 			storage.RegistrationDAO().Upsert(
 				token,
 				&user,
-				time.Now().Add(tokenTTL),
+				time.Now().Add(utils.TokenTTL),
 				verificationCode,
 			)
 
@@ -47,7 +43,7 @@ func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, stor
 			return http.StatusOK, &RevalidateRegistrationCredentialsResponse{
 				Response: &RevalidateRegistrationCredentialsWrapper{
 					RandomToken: token,
-					ExpiresIn:   strconv.Itoa(int(resentCodeIn.Seconds())),
+					ExpiresIn:   strconv.Itoa(int(utils.ResentCodeIn.Seconds())),
 				},
 			}
 		}

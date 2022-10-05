@@ -2,15 +2,15 @@ package accounts
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsLogin - Called URI %s", request.RequestURI)
 
 		var loginRequest LoginRequest
@@ -25,6 +25,7 @@ func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.H
 			return
 		}
 
+		writer.Header().Set("Content-Type", "application/json")
 		if !isValid {
 			writer.WriteHeader(http.StatusUnauthorized)
 		} else {

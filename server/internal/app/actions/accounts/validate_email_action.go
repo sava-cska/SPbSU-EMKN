@@ -61,6 +61,7 @@ func HandleAccountsValidateEmail(logger *logrus.Logger, storage *storage.Storage
 			returnCode = http.StatusBadRequest
 		}
 
+		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(returnCode)
 		writer.Write([]byte(responseJSON))
 	}

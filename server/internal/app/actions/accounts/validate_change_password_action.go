@@ -1,9 +1,7 @@
 package accounts
 
 import (
-	"encoding/hex"
 	"encoding/json"
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -13,10 +11,7 @@ import (
 )
 
 func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	tokenLength := uint16(20)
-
 	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
 		logger.Debugf("HandleAccountsValidateChangePassword - Called URI %s", request.RequestURI)
 
 		var parsedRequest = ValidateChangePasswordRequest{}
@@ -40,7 +35,7 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 		var responseBody ValidateChangePasswordResponse
 		var statusCode int
 		if errors == nil {
-			token := generateToken(tokenLength)
+			token := utils.GenerateToken()
 			err = storage.ChangePasswordDao().SetChangePasswordToken(parsedRequest.RandomToken, token)
 			if err != nil {
 				utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to store changePasswordToken", err)
@@ -57,23 +52,16 @@ func HandleValidateChangePassword(logger *logrus.Logger, storage *storage.Storag
 			statusCode = http.StatusBadRequest
 		}
 
-		body, err := json.Marshal(&responseBody)
+		body, err := json.Marshal(responseBody)
 		if err != nil {
 			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", err)
 			return
 		}
 
+		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(statusCode)
 		writer.Write(body)
 	}
-}
-
-func generateToken(length uint16) string {
-	b := make([]byte, length)
-	if _, err := rand.Read(b); err != nil {
-		return ""
-	}
-	return hex.EncodeToString(b)
 }
 
 func validateVerificationCode(correctVerificationCode string, verificationCode string, expiresAt *time.Time) *ErrorsUnion {

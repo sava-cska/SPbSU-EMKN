@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -25,12 +26,25 @@ func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.H
 			return
 		}
 
-		writer.Header().Set("Content-Type", "application/json")
+		var returnCode int
+		var response LoginResponse
 		if !isValid {
-			writer.WriteHeader(http.StatusUnauthorized)
+			returnCode = http.StatusBadRequest
+			response = LoginResponse{Errors: &ErrorsUnion{InvalidLoginOrPassword: &Error{}}}
 		} else {
-			writer.WriteHeader(http.StatusOK)
+			returnCode = http.StatusOK
+			response = LoginResponse{}
 		}
+
+		responseJSON, errJSON := json.Marshal(response)
+		if errJSON != nil {
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errJSON)
+			return
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(returnCode)
+		writer.Write(responseJSON)
 	}
 }
 

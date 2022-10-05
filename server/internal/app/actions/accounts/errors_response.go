@@ -11,4 +11,5 @@ type ErrorsUnion struct {
 	InvalidCode                     *Error `json:"code_invalid,omitempty"`
 	ChangePasswordExpired           *Error `json:"password_change_expired,omitempty"`
 	InvalidRegistrationRevalidation *Error `json:"invalid_registration_revalidation,omitempty"`
+	InvalidLoginOrPassword          *Error `json:"invalid_login_or_password,omitempty"`
 }

@@ -10,12 +10,24 @@ type UserDAO struct {
 	Storage *Storage
 }
 
-func (dao *UserDAO) Exists(login string) bool {
+func (dao *UserDAO) ExistsLogin(login string) bool {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT login
 			   FROM user_base
 			   WHERE login = $1`,
 		login,
+	)
+	var tmpLogin string
+	err := row.Scan(&tmpLogin)
+	return err != sql.ErrNoRows
+}
+
+func (dao *UserDAO) ExistsEmail(email string) bool {
+	row := dao.Storage.Db.QueryRow(
+		`SELECT email
+			   FROM user_base
+			   WHERE email = $1`,
+		email,
 	)
 	var tmpLogin string
 	err := row.Scan(&tmpLogin)

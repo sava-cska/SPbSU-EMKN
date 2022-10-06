@@ -7,6 +7,7 @@ type ErrorsUnion struct {
 	IllegalLogin                    *Error `json:"illegal_login,omitempty"`
 	IllegalEmail                    *Error `json:"illegal_email,omitempty"`
 	LoginIsNotAvailable             *Error `json:"login_is_not_available,omitempty"`
+	EmailIsNotAvailable             *Error `json:"email_is_not_available,omitempty"`
 	RegistrationExpired             *Error `json:"registration_expired,omitempty"`
 	InvalidCode                     *Error `json:"code_invalid,omitempty"`
 	ChangePasswordExpired           *Error `json:"password_change_expired,omitempty"`

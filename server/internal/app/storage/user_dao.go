@@ -56,6 +56,20 @@ func (dao *UserDAO) FindUser(email string) (users.User, error) {
 	return user, err
 }
 
+func (dao *UserDAO) FindUserByLogin(login string) (users.User, error) {
+	row := dao.Storage.Db.QueryRow(
+		`
+		SELECT login, password, email, first_name, last_name
+		FROM user_base
+		WHERE login = $1
+		`,
+		login)
+
+	var user users.User
+	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
+	return user, err
+}
+
 func (dao *UserDAO) GetPassword(login string) (string, error) {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT password

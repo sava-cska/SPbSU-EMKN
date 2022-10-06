@@ -19,7 +19,7 @@ func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, stor
 			if err != nil {
 				return http.StatusInternalServerError, &RevalidateRegistrationCredentialsResponse{}
 			}
-			if storage.UserDAO().Exists(user.Login) {
+			if storage.UserDAO().ExistsLogin(user.Login) {
 				return http.StatusBadRequest, &RevalidateRegistrationCredentialsResponse{Errors: &ErrorsUnion{
 					InvalidRegistrationRevalidation: &Error{}},
 				}

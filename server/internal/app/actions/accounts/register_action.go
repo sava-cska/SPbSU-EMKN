@@ -42,9 +42,14 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 				Errors: errors,
 			}
 		}
-		if storage.UserDAO().Exists(request.Login) {
+		if storage.UserDAO().ExistsLogin(request.Login) {
 			return http.StatusBadRequest, &RegisterResponse{
 				Errors: &ErrorsUnion{LoginIsNotAvailable: &Error{}},
+			}
+		}
+		if storage.UserDAO().ExistsEmail(request.Email) {
+			return http.StatusBadRequest, &RegisterResponse{
+				Errors: &ErrorsUnion{EmailIsNotAvailable: &Error{}},
 			}
 		}
 

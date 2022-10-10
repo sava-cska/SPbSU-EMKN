@@ -1,5 +1,6 @@
 .PHONY: build
 build:
+	go mod tidy
 	go build -o main.out -v ./cmd
 
 .PHONY: deploy

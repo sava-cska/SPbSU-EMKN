@@ -1,4 +1,4 @@
-package server
+package core
 
 import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"

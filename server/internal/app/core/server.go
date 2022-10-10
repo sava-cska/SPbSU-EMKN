@@ -5,9 +5,11 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/base"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
+	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
@@ -100,39 +102,39 @@ func (server *Server) configureRouter() {
 }
 
 // used before all handlers that require user authorization
-//func (server *Server) withAuth(handlerFunc http.HandlerFunc, logger *logrus.Logger) http.HandlerFunc {
-//	return func(writer http.ResponseWriter, request *http.Request) {
-//		header := request.Header.Get("Authorization")
-//		if header == "" {
-//			utils.HandleError(logger, writer, http.StatusUnauthorized, "Missing authorization header", nil)
-//			return
-//		}
-//
-//		if !strings.HasPrefix(header, "Basic") {
-//			utils.HandleError(logger, writer, http.StatusUnauthorized, "Unsupported authorization type", nil)
-//			return
-//		}
-//
-//		authHeader := strings.TrimPrefix(header, "Basic ")
-//		creds := strings.Split(authHeader, ":")
-//		if len(creds) != 2 {
-//			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong authorization format", nil)
-//			return
-//		}
-//		login := creds[0]
-//		passwd := creds[1]
-//
-//		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.dependency.Storage)
-//		if err != nil {
-//			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate credentials", err)
-//			return
-//		}
-//
-//		if !isValid {
-//			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong login or password", nil)
-//			return
-//		}
-//
-//		handlerFunc(writer, request)
-//	}
-//}
+func (server *Server) withAuth(handlerFunc http.HandlerFunc, logger *logrus.Logger) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		header := request.Header.Get("Authorization")
+		if header == "" {
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Missing authorization header", nil)
+			return
+		}
+
+		if !strings.HasPrefix(header, "Basic") {
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Unsupported authorization type", nil)
+			return
+		}
+
+		authHeader := strings.TrimPrefix(header, "Basic ")
+		creds := strings.Split(authHeader, ":")
+		if len(creds) != 2 {
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong authorization format", nil)
+			return
+		}
+		login := creds[0]
+		passwd := creds[1]
+
+		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.context.Storage)
+		if err != nil {
+			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate credentials", err)
+			return
+		}
+
+		if !isValid {
+			utils.HandleError(logger, writer, http.StatusUnauthorized, "Wrong login or password", nil)
+			return
+		}
+
+		handlerFunc(writer, request)
+	}
+}

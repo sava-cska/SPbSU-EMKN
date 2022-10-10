@@ -2,6 +2,7 @@ package base
 
 import (
 	"encoding/json"
+	"github.com/gdexlab/go-render/render"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"net/http"
@@ -13,21 +14,24 @@ func HandleAction[Req Request, Res Response](
 	context *dependency.DependencyContext,
 ) {
 	handlerFunc := func(responseWriter http.ResponseWriter, httpRequest *http.Request) {
-		context.Logger.Debugf("HandleAction - Called URI %s", httpRequest.RequestURI)
+		context.Logger.Debugf("%s - Called URI %s", path, httpRequest.RequestURI)
 
-		var registerRequest Req
-		if errJSON := utils.ParseBody(interface{}(&registerRequest), httpRequest); errJSON != nil {
+		var request Req
+		if errJSON := utils.ParseBody(interface{}(&request), httpRequest); errJSON != nil {
 			utils.HandleError(context.Logger, responseWriter, http.StatusBadRequest, "Can't parse httpRequest.", errJSON)
 			return
 		}
 
-		code, resp := businessLogicHandler(&registerRequest, context)
+		context.Logger.Debugf("%s\n\trequest: %s", path, render.AsCode(request))
 
-		respJSON, errRespJSON := json.Marshal(resp)
+		code, response := businessLogicHandler(&request, context)
+
+		respJSON, errRespJSON := json.Marshal(response)
 		if errRespJSON != nil {
 			utils.HandleError(context.Logger, responseWriter, http.StatusInternalServerError, "Can't create JSON object from data.", errRespJSON)
 			return
 		}
+		context.Logger.Debugf("%s\n\tcode: %d\n\tresponse: %s", path, code, render.AsCode(response))
 
 		responseWriter.Header().Set("Content-Type", "application/json")
 		responseWriter.WriteHeader(code)

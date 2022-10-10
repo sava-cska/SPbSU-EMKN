@@ -2,11 +2,11 @@ package accounts
 
 import (
 	"encoding/json"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -31,7 +31,7 @@ func startChangePassword(logger *logrus.Logger, storage *storage.Storage, mailer
 		token, verificationCode)
 
 	go func() {
-		if errEmail := mailer.SendEmail([]string{email}, buildMessage(verificationCode,
+		if errEmail := mailer.SendEmail([]string{email}, notifier.BuildMessage(verificationCode,
 			user.FirstName, user.LastName)); errEmail != nil {
 			logger.Error("Can't send email to %s, %s", email, errEmail.Error())
 		}

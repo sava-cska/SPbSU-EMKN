@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"math/rand"
 	"net/http"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 
 	"github.com/gorilla/mux"

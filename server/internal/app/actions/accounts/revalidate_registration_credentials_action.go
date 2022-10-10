@@ -2,11 +2,11 @@ package accounts
 
 import (
 	"encoding/json"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -34,7 +34,7 @@ func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, stor
 			)
 
 			go func() {
-				err := mailer.SendEmail([]string{user.Email}, buildMessage(verificationCode, user.FirstName, user.LastName))
+				err := mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode, user.FirstName, user.LastName))
 				if err != nil {
 					logger.Debugf(err.Error())
 				}

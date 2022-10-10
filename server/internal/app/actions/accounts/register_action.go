@@ -2,14 +2,12 @@ package accounts
 
 import (
 	"encoding/json"
-	"fmt"
-	"html"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"net/http"
 	"net/mail"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
 
@@ -63,7 +61,7 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		)
 
 		go func() {
-			err := mailer.SendEmail([]string{request.Email}, buildMessage(verificationCode, request.FirstName, request.LastName))
+			err := mailer.SendEmail([]string{request.Email}, notifier.BuildMessage(verificationCode, request.FirstName, request.LastName))
 			if err != nil {
 				logger.Error("Can't send email to %s, %s", request.Email, err.Error())
 			}
@@ -97,15 +95,5 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(code)
 		writer.Write(respJSON)
-	}
-}
-
-func buildMessage(verificationCode string, firstName string, lastName string) notifier.Message {
-	return notifier.Message{
-		Subject: "Код подтверждения",
-		Body: fmt.Sprintf("<html><body>Здравствуйте, %s %s!<br>Код подтверждения: <b>%s</b></body></html>",
-			html.EscapeString(firstName),
-			html.EscapeString(lastName),
-			verificationCode),
 	}
 }

@@ -1,51 +1,31 @@
 package accounts
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"net/http"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
 )
 
-func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsLogin - Called URI %s", request.RequestURI)
-
-		var loginRequest LoginRequest
-		if err := utils.ParseBody(interface{}(&loginRequest), request); err != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to parse request body", err)
-			return
-		}
-
-		isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, storage)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate user credentials", err)
-			return
-		}
-
-		var returnCode int
-		var response LoginResponse
-		if !isValid {
-			returnCode = http.StatusBadRequest
-			response = LoginResponse{Errors: &ErrorsUnion{InvalidLoginOrPassword: &Error{}}}
-		} else {
-			returnCode = http.StatusOK
-			response = LoginResponse{}
-		}
-
-		responseJSON, errJSON := json.Marshal(response)
-		if errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errJSON)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(returnCode)
-		writer.Write(responseJSON)
+func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext) (int, *LoginResponse) {
+	isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, context.Storage)
+	if err != nil {
+		context.Logger.Error("Failed to validate user credentials", err)
+		return http.StatusInternalServerError, &LoginResponse{}
 	}
+
+	var statusCode int
+	var response LoginResponse
+	if !isValid {
+		statusCode = http.StatusBadRequest
+		response = LoginResponse{Errors: &ErrorsUnion{InvalidLoginOrPassword: &Error{}}}
+	} else {
+		statusCode = http.StatusOK
+		response = LoginResponse{}
+	}
+
+	return statusCode, &response
 }
 
 // ValidateUserCredentials returns tuple (is credentials valid, error if internal error happened)

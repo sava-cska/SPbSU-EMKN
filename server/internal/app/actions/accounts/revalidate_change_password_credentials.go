@@ -1,65 +1,48 @@
 package accounts
 
 import (
-	"encoding/json"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func HandleRevalidateChangePasswordCredentials(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleRevalidateChangePasswordCredentials - Called URI %s", request.RequestURI)
-
-		var parsedRequest = RevalidateChangePasswordCredentialsRequest{}
-		if err := utils.ParseBody(interface{}(&parsedRequest), request); err != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to parse revalidate_change_password request body", err)
-			return
-		}
-
-		verificationCode := utils.GenerateVerificationCode()
-		login, tokenExists, err := storage.ChangePasswordDao().UpdateVerificationCode(parsedRequest.RandomToken, verificationCode)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to update verification code", err)
-			return
-		}
-
-		var statusCode int
-		var resp RevalidateChangePasswordCredentialsResponse
-		if tokenExists {
-			user, err := storage.UserDAO().FindUserByLogin(login)
-			if err != nil {
-				utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to get user from database", err)
-				return
-			}
-			go func() {
-				if errEmail := mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode,
-					user.FirstName, user.LastName)); errEmail != nil {
-					logger.Errorf("Can't send email to %s, %s", user.Email, errEmail.Error())
-				}
-			}()
-
-			resp = RevalidateChangePasswordCredentialsResponse{}
-			statusCode = http.StatusOK
-		} else {
-			resp = RevalidateChangePasswordCredentialsResponse{
-				Errors: &ErrorsUnion{
-					InvalidChangePasswordRevalidation: &Error{},
-				},
-			}
-			statusCode = http.StatusBadRequest
-		}
-
-		body, err := json.Marshal(resp)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to write revalidate_change_password response", err)
-			return
-		}
-
-		writer.WriteHeader(statusCode)
-		_, _ = writer.Write(body)
-		writer.Header().Set("Content-Type", "application/json")
+func HandleRevalidateChangePasswordCredentials(request *RevalidateChangePasswordCredentialsRequest, context *dependency.DependencyContext) (int, *RevalidateChangePasswordCredentialsResponse) {
+	returnErr := func(statusCode int, reason string, err error) (int, *RevalidateChangePasswordCredentialsResponse) {
+		context.Logger.Error(reason, err)
+		return statusCode, &RevalidateChangePasswordCredentialsResponse{}
 	}
+
+	verificationCode := utils.GenerateVerificationCode()
+	login, tokenExists, err := context.Storage.ChangePasswordDao().UpdateVerificationCode(request.RandomToken, verificationCode)
+	if err != nil {
+		return returnErr(http.StatusInternalServerError, "Failed to update verification code", err)
+	}
+
+	var statusCode int
+	var resp RevalidateChangePasswordCredentialsResponse
+	if tokenExists {
+		user, err := context.Storage.UserDAO().FindUserByLogin(login)
+		if err != nil {
+			return returnErr(http.StatusInternalServerError, "Failed to get user from database", err)
+		}
+		go func() {
+			if errEmail := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode,
+				user.FirstName, user.LastName)); errEmail != nil {
+				context.Logger.Errorf("Can't send email to %s, %s", user.Email, errEmail.Error())
+			}
+		}()
+
+		resp = RevalidateChangePasswordCredentialsResponse{}
+		statusCode = http.StatusOK
+	} else {
+		resp = RevalidateChangePasswordCredentialsResponse{
+			Errors: &ErrorsUnion{
+				InvalidChangePasswordRevalidation: &Error{},
+			},
+		}
+		statusCode = http.StatusBadRequest
+	}
+
+	return statusCode, &resp
 }

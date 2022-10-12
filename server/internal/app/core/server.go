@@ -87,18 +87,20 @@ func (server *Server) configureRouter() {
 
 	//server.router.HandleFunc("/accounts/validate_email",
 	//	accounts.HandleAccountsValidateEmail(server.logger, server.storage))
-	//server.router.HandleFunc("/accounts/login",
-	//	accounts.HandleAccountsLogin(server.logger, server.storage))
+
+	base.HandleAction("/accounts/login", accounts.HandleAccountsLogin, server.context)
+
 	//server.router.HandleFunc("/accounts/begin_change_password",
 	//	accounts.HandleAccountsChangePwd(server.logger, server.storage, server.mailer))
-	//server.router.HandleFunc("/accounts/validate_change_password",
-	//	accounts.HandleValidateChangePassword(server.logger, server.storage))
+
+	base.HandleAction("/accounts/validate_change_password", accounts.HandleValidateChangePassword, server.context)
+
 	//server.router.HandleFunc("/accounts/commit_change_password",
 	//	accounts.HandleAccountsCommitPwdChange(server.logger, server.storage))
 	//server.router.HandleFunc("/accounts/revalidate_registration_credentials",
 	//	accounts.HandleAccountsRevalidateRegistrationCredentials(server.logger, server.storage, server.mailer))
-	//server.router.HandleFunc("/accounts/revalidate_change_password_credentials",
-	//	accounts.HandleRevalidateChangePasswordCredentials(server.logger, server.storage, server.mailer))
+
+	base.HandleAction("/accounts/revalidate_change_password_credentials", accounts.HandleRevalidateChangePasswordCredentials, server.context)
 }
 
 // used before all handlers that require user authorization

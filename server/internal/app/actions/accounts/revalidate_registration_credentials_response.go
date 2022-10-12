@@ -9,3 +9,6 @@ type RevalidateRegistrationCredentialsResponse struct {
 	Errors   *ErrorsUnion                              `json:"errors,omitempty"`
 	Response *RevalidateRegistrationCredentialsWrapper `json:"response,omitempty"`
 }
+
+func (request RevalidateRegistrationCredentialsResponse) Bind() {
+}

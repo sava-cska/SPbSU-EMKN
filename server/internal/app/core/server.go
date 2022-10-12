@@ -94,8 +94,7 @@ func (server *Server) configureRouter() {
 	//server.router.HandleFunc("/accounts/validate_change_password",
 	//	accounts.HandleValidateChangePassword(server.logger, server.storage))
 	//server.router.HandleFunc("/accounts/commit_change_password",
-	//	accounts.HandleAccountsCommitPwdChange(server.logger, server.storage))
-	//server.router.HandleFunc("/accounts/revalidate_registration_credentials",
+	base.HandleAction("/accounts/revalidate_registration_credentials", accounts.HandleAccountsRevalidateRegistrationCredentials, server.context)
 	//	accounts.HandleAccountsRevalidateRegistrationCredentials(server.logger, server.storage, server.mailer))
 	//server.router.HandleFunc("/accounts/revalidate_change_password_credentials",
 	//	accounts.HandleRevalidateChangePasswordCredentials(server.logger, server.storage, server.mailer))

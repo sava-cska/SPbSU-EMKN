@@ -1,77 +1,48 @@
 package accounts
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
 )
 
-func checkExpiredTimeAndNewPwd(changePwdExpiredTime time.Time, currentTime time.Time,
-	newPassword string) (CommitPwdChangeResponse, error) {
-	if changePwdExpiredTime.Before(currentTime) {
-		response := CommitPwdChangeResponse{Errors: &ErrorsUnion{ChangePasswordExpired: &Error{}}}
-		return response, errors.New("time is expired")
-	}
+func HandleAccountsCommitChangePassword(request *CommitChangePasswordRequest,
+	context *dependency.DependencyContext) (int, *CommitChangePasswordResponse) {
+	context.Logger.Debugf("CommitChangePassword: start with new_password = %s", request.NewPassword)
 
-	if len(newPassword) == 0 {
-		response := CommitPwdChangeResponse{Errors: &ErrorsUnion{IllegalPassword: &Error{}}}
-		return response, errors.New("empty password")
-	}
+	currentTime := time.Now()
 
-	return CommitPwdChangeResponse{}, nil
-}
-
-func commitPwdChange(logger *logrus.Logger, writer http.ResponseWriter, storage *storage.Storage,
-	requestCommit *CommitPwdChangeRequest, currentTime time.Time) (CommitPwdChangeResponse, int, error) {
-	login, changePwdExpiredTime, errDB := storage.ChangePasswordDao().FindPwdToken(requestCommit.ChangePwdToken)
+	login, changePasswordExpiredTime, errDB := context.Storage.ChangePasswordDao().FindPwdToken(request.ChangePasswordToken)
 	if errDB != nil {
-		return CommitPwdChangeResponse{}, 0, errDB
+		context.Logger.Errorf("CommitChangePassword: can't find record with token = %s in change_password_base, %s",
+			request.ChangePasswordToken, errDB)
+		return http.StatusBadRequest, &CommitChangePasswordResponse{}
 	}
 
-	response, errCheck := checkExpiredTimeAndNewPwd(changePwdExpiredTime, currentTime, requestCommit.NewPassword)
-	if errCheck != nil {
-		return response, http.StatusInternalServerError, nil
-	}
-
-	errUpdate := storage.UserDAO().UpdatePassword(login, requestCommit.NewPassword)
-	if errUpdate != nil {
-		return CommitPwdChangeResponse{}, 0, errUpdate
-	}
-
-	return CommitPwdChangeResponse{}, http.StatusOK, nil
-}
-
-func HandleAccountsCommitPwdChange(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsCommitPwdChange - Called URI %s", request.RequestURI)
-
-		currentTime := time.Now()
-
-		var commitPwdChangeRequest CommitPwdChangeRequest
-		if errJSON := utils.ParseBody(interface{}(&commitPwdChangeRequest), request); errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse /accounts/commit_change_password request.", errJSON)
-			return
+	if changePasswordExpiredTime.Before(currentTime) {
+		context.Logger.Errorf("CommitChangePassword: time for login = %s expired", login)
+		return http.StatusBadRequest, &CommitChangePasswordResponse{
+			Errors: &ErrorsUnion{
+				ChangePasswordExpired: &Error{},
+			},
 		}
-
-		response, returnCode, err := commitPwdChange(logger, writer, storage, &commitPwdChangeRequest, currentTime)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't update password.", err)
-			return
-		}
-
-		responseJSON, errJSON := json.Marshal(response)
-		if errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errJSON)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(returnCode)
-		writer.Write(responseJSON)
 	}
+
+	if !internal_data.ValidatePassword(request.NewPassword) {
+		context.Logger.Errorf("CommitChangePassword: invalid password = %s", request.NewPassword)
+		return http.StatusBadRequest, &CommitChangePasswordResponse{
+			Errors: &ErrorsUnion{
+				IllegalPassword: &Error{},
+			},
+		}
+	}
+
+	if errUpdate := context.Storage.UserDAO().UpdatePassword(login, request.NewPassword); errUpdate != nil {
+		context.Logger.Errorf("CommitChangePassword: can't update password for login = %s in user_base", login, errUpdate)
+		return http.StatusInternalServerError, &CommitChangePasswordResponse{}
+	}
+
+	return http.StatusOK, &CommitChangePasswordResponse{}
 }

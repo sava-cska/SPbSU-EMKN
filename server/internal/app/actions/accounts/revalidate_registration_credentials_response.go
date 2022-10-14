@@ -10,5 +10,4 @@ type RevalidateRegistrationCredentialsResponse struct {
 	Response *RevalidateRegistrationCredentialsWrapper `json:"response,omitempty"`
 }
 
-func (request RevalidateRegistrationCredentialsResponse) Bind() {
-}
+func (request RevalidateRegistrationCredentialsResponse) Bind() {}

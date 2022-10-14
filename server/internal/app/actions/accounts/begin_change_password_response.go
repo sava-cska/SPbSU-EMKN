@@ -1,11 +1,13 @@
 package accounts
 
-type ChangePwdWrapper struct {
-	Token       string `json:"random_token"`
-	TimeExpired string `json:"expires_in"`
+type BeginChangePasswordWrapper struct {
+	Token       string `json:"random_token,omitempty"`
+	TimeExpired string `json:"expires_in,omitempty"`
 }
 
-type ChangePwdResponse struct {
-	Errors   *ErrorsUnion      `json:"errors,omitempty"`
-	Response *ChangePwdWrapper `json:"response,omitempty"`
+type BeginChangePasswordResponse struct {
+	Errors   *ErrorsUnion                `json:"errors,omitempty"`
+	Response *BeginChangePasswordWrapper `json:"response,omitempty"`
 }
+
+func (response BeginChangePasswordResponse) Bind() {}

@@ -1,5 +1,7 @@
 package accounts
 
-type CommitPwdChangeResponse struct {
+type CommitChangePasswordResponse struct {
 	Errors *ErrorsUnion `json:"errors,omitempty"`
 }
+
+func (response CommitChangePasswordResponse) Bind() {}

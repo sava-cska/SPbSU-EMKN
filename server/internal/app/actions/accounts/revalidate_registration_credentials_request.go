@@ -4,5 +4,4 @@ type RevalidateRegistrationCredentialsRequest struct {
 	Token string `json:"random_token"`
 }
 
-func (request RevalidateRegistrationCredentialsRequest) Bind() {
-}
+func (request RevalidateRegistrationCredentialsRequest) Bind() {}

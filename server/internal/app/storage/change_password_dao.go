@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -52,23 +51,26 @@ func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime tim
 	return err
 }
 
-func (cpd *ChangePasswordDao) UpdateVerificationCode(token string, newVerificationCode string) (string, bool, error) {
-	res := cpd.Storage.Db.QueryRow(
-		`UPDATE change_password_base
-               SET verification_code = $1
-               WHERE token = $2
-               RETURNING login`,
-		newVerificationCode, token,
-	)
-	login := ""
-	if err := res.Scan(&login); err != nil {
-		if err == sql.ErrNoRows {
-			return "", false, nil
-		} else {
-			return "", false, err
-		}
+func (cpd *ChangePasswordDao) FindTokenAndDelete(token string) (string, error) {
+	tx, err := cpd.Storage.Db.Begin()
+	if err != nil {
+		return "", err
 	}
-	return login, true, nil
+	registerRecord := tx.QueryRow(`SELECT login FROM change_password_base WHERE token = $1`, token)
+
+	var login string
+	if errScan := registerRecord.Scan(&login); errScan != nil {
+		tx.Rollback()
+		return "", errScan
+	}
+
+	_, err = tx.Exec(`DELETE FROM change_password_base WHERE token = $1`, token)
+	if err != nil {
+		tx.Rollback()
+		return "", err
+	}
+	tx.Commit()
+	return login, nil
 }
 
 func (cpd *ChangePasswordDao) FindPwdToken(changePwdToken string) (string, time.Time, error) {

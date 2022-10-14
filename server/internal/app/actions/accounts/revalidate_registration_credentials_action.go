@@ -1,48 +1,57 @@
 package accounts
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
 func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistrationCredentialsRequest,
 	context *dependency.DependencyContext) (int, *RevalidateRegistrationCredentialsResponse) {
+	context.Logger.Debugf("RevalidateRegistrationCredentials: start with token = %s", request.Token)
+
 	handleAccountsRevalidateRegistrationCredentials :=
 		func(request *RevalidateRegistrationCredentialsRequest) (int, *RevalidateRegistrationCredentialsResponse) {
 			user, _, _, err := context.Storage.RegistrationDAO().FindRegistrationAndDelete(request.Token)
 			if err != nil {
+				context.Logger.Errorf("RevalidateRegistrationCredentials: can't find and delete record in registration_base")
 				return http.StatusInternalServerError, &RevalidateRegistrationCredentialsResponse{}
 			}
+			context.Logger.Debugf("RevalidateRegistrationCredentials: find user with login = %s", user.Login)
 			if context.Storage.UserDAO().ExistsLogin(user.Login) {
+				context.Logger.Errorf("RevalidateRegistrationCredentials: login = %s already exist", user.Login)
 				return http.StatusBadRequest, &RevalidateRegistrationCredentialsResponse{Errors: &ErrorsUnion{
 					InvalidRegistrationRevalidation: &Error{}},
 				}
 			}
-			token := utils.GenerateToken()
-			verificationCode := utils.GenerateVerificationCode()
+
+			token := internal_data.GenerateToken()
+			verificationCode := notifier.GenerateVerificationCode()
+			context.Logger.Debugf("RevalidateRegistrationCredentials: token = %s, verificationCode = %s", token, verificationCode)
+
 			context.Storage.RegistrationDAO().Upsert(
 				token,
 				&user,
-				time.Now().Add(utils.TokenTTL),
+				time.Now().Add(internal_data.TokenTTL),
 				verificationCode,
 			)
 
 			go func() {
-				err := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode, user.FirstName, user.LastName))
+				err := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode, user.FirstName,
+					user.LastName))
 				if err != nil {
-					context.Logger.Debugf(err.Error())
+					context.Logger.Debugf("RevalidateRegistrationCredentials: can't send email to %s, %s", user.Email, err)
 				}
 			}()
 
 			return http.StatusOK, &RevalidateRegistrationCredentialsResponse{
 				Response: &RevalidateRegistrationCredentialsWrapper{
 					RandomToken: token,
-					ExpiresIn:   strconv.Itoa(int(utils.ResentCodeIn.Seconds())),
+					ExpiresIn:   strconv.Itoa(int(internal_data.ResentCodeIn.Seconds())),
 				},
 			}
 		}

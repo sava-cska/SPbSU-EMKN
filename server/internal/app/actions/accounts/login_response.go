@@ -4,5 +4,4 @@ type LoginResponse struct {
 	Errors *ErrorsUnion `json:"errors,omitempty"`
 }
 
-func (response LoginResponse) Bind() {
-}
+func (response LoginResponse) Bind() {}

@@ -1,5 +1,7 @@
 package accounts
 
-type ChangePwdRequest struct {
+type BeginChangePasswordRequest struct {
 	Email string `json:"email"`
 }
+
+func (request BeginChangePasswordRequest) Bind() {}

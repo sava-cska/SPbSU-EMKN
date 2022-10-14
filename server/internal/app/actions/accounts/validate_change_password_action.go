@@ -1,61 +1,58 @@
 package accounts
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"net/http"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
 )
 
-func HandleValidateChangePassword(request *ValidateChangePasswordRequest, context *dependency.DependencyContext) (int, *ValidateChangePasswordResponse) {
+func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest,
+	context *dependency.DependencyContext) (int, *ValidateChangePasswordResponse) {
+	context.Logger.Debugf("ValidateChangePassword: start with verificationCode = %s", request.VerificationCode)
+
+	currentTime := time.Now()
 
 	returnErr := func(statusCode int, reason string, err error) (int, *ValidateChangePasswordResponse) {
-		context.Logger.Error(reason, err)
+		context.Logger.Errorf("ValidateChangePassword: %s, %s", reason, err)
 		return statusCode, &ValidateChangePasswordResponse{}
 	}
 
 	correctVerificationCode, expiresAt, err := context.Storage.ChangePasswordDao().GetVerificationCodeInfo(request.RandomToken)
 	if err != nil {
-		return returnErr(http.StatusInternalServerError, "Failed to get verification code", err)
+		return returnErr(http.StatusInternalServerError, "Failed to get verification code from change_password_base", err)
 	}
 	if correctVerificationCode == "" {
-		return returnErr(http.StatusBadRequest, "Failed to find random token", nil)
+		return returnErr(http.StatusBadRequest, "Failed to find random token in change_password_base", nil)
 	}
 
-	errors := validateVerificationCode(correctVerificationCode, request.VerificationCode, expiresAt)
-
-	var responseBody ValidateChangePasswordResponse
-	var statusCode int
-	if errors == nil {
-		token := utils.GenerateToken()
-		err = context.Storage.ChangePasswordDao().SetChangePasswordToken(request.RandomToken,
-			time.Now().Add(utils.TokenTTL), token)
-		if err != nil {
-			return returnErr(http.StatusInternalServerError, "Failed to store changePasswordToken", err)
+	if expiresAt.Before(currentTime) {
+		context.Logger.Errorf("ValidateChangePassword: time expired")
+		return http.StatusBadRequest, &ValidateChangePasswordResponse{
+			Errors: &ErrorsUnion{
+				ChangePasswordExpired: &Error{},
+			},
 		}
-		responseBody = ValidateChangePasswordResponse{
-			ChangePasswordToken: token,
+	}
+
+	if correctVerificationCode != request.VerificationCode {
+		context.Logger.Errorf("ValidateChangePassword: verification code isn't correct, correct verification code = %s",
+			correctVerificationCode)
+		return http.StatusBadRequest, &ValidateChangePasswordResponse{
+			Errors: &ErrorsUnion{
+				InvalidCode: &Error{},
+			},
 		}
-		statusCode = http.StatusOK
-	} else {
-		responseBody = ValidateChangePasswordResponse{
-			Errors: errors,
-		}
-		statusCode = http.StatusBadRequest
 	}
 
-	return statusCode, &responseBody
-}
+	token := internal_data.GenerateToken()
+	context.Logger.Debugf("ValidateChangePassword: token = %s", token)
 
-func validateVerificationCode(correctVerificationCode string, verificationCode string, expiresAt *time.Time) *ErrorsUnion {
-	if expiresAt.Before(time.Now()) {
-		return &ErrorsUnion{ChangePasswordExpired: &Error{}}
+	err = context.Storage.ChangePasswordDao().SetChangePasswordToken(request.RandomToken,
+		time.Now().Add(internal_data.TokenTTL), token)
+	if err != nil {
+		return returnErr(http.StatusInternalServerError, "Failed to store changePasswordToken in change_password_base", err)
 	}
-
-	if correctVerificationCode != verificationCode {
-		return &ErrorsUnion{InvalidCode: &Error{}}
-	}
-
-	return nil
+	return http.StatusOK, &ValidateChangePasswordResponse{ChangePasswordToken: token}
 }

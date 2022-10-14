@@ -51,7 +51,7 @@ func (dao *RegistrationDAO) FindRegistration(token string) (models.User, time.Ti
 func (dao *RegistrationDAO) FindRegistrationAndDelete(token string) (models.User, time.Time, string, error) {
 	tx, err := dao.Storage.Db.Begin()
 	if err != nil {
-		return models.User{}, time.Time{}, "", nil
+		return models.User{}, time.Time{}, "", err
 	}
 	registerRecord := tx.QueryRow(
 		`SELECT login, password, email, first_name, last_name, expire_date, verification_code

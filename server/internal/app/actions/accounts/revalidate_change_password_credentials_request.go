@@ -4,5 +4,4 @@ type RevalidateChangePasswordCredentialsRequest struct {
 	RandomToken string `json:"random_token"`
 }
 
-func (response RevalidateChangePasswordCredentialsRequest) Bind() {
-}
+func (response RevalidateChangePasswordCredentialsRequest) Bind() {}

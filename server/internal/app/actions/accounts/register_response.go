@@ -10,5 +10,4 @@ type RegisterResponse struct {
 	Response *RegisterWrapper `json:"response,omitempty"`
 }
 
-func (response RegisterResponse) Bind() {
-}
+func (response RegisterResponse) Bind() {}

@@ -1,68 +1,37 @@
 package accounts
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
-func checkCorrectnessCode(expireTime time.Time, currentTime time.Time, verificationCodeFromDB string,
-	verificationCodeFromRequest string) (ValidateEmailResponse, error) {
+func HandleAccountsValidateEmail(request *ValidateEmailRequest, context *dependency.DependencyContext) (int, *ValidateEmailResponse) {
+	context.Logger.Debugf("ValidateEmail: start with verificationCode = %s", request.VerificationCode)
+
+	currentTime := time.Now()
+
+	user, expireTime, verificationCodeDB, err := context.Storage.RegistrationDAO().FindRegistration(request.Token)
+	if err != nil {
+		context.Logger.Errorf("ValidateEmail: can't find record with token = %s in registration_base",
+			request.Token)
+		return http.StatusBadRequest, &ValidateEmailResponse{}
+	}
+
 	if expireTime.Before(currentTime) {
-		return ValidateEmailResponse{Errors: &ErrorsUnion{RegistrationExpired: &Error{}}}, errors.New("time expired")
+		context.Logger.Errorf("ValidateEmail: time expired")
+		return http.StatusBadRequest, &ValidateEmailResponse{Errors: &ErrorsUnion{RegistrationExpired: &Error{}}}
+	}
+	if request.VerificationCode != verificationCodeDB {
+		context.Logger.Errorf("ValidateEmail: verification code isn't correct, correct verification code = %s", verificationCodeDB)
+		return http.StatusBadRequest, &ValidateEmailResponse{Errors: &ErrorsUnion{InvalidCode: &Error{}}}
 	}
 
-	if verificationCodeFromDB != verificationCodeFromRequest {
-		return ValidateEmailResponse{Errors: &ErrorsUnion{InvalidCode: &Error{}}},
-			errors.New("verification code isn't correct")
+	if errAdd := context.Storage.UserDAO().AddUser(&user); errAdd != nil {
+		context.Logger.Errorf("ValidateEmail: can't add user in user_base")
+		return http.StatusInternalServerError, &ValidateEmailResponse{}
 	}
-	return ValidateEmailResponse{}, nil
-}
 
-func HandleAccountsValidateEmail(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsValidateEmail - Called URI %s", request.RequestURI)
-
-		currentTime := time.Now()
-		var validationRequest ValidateEmailRequest
-		if errJSON := utils.ParseBody(interface{}(&validationRequest), request); errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse /accounts/validate_email request.", errJSON)
-			return
-		}
-
-		logger.Debugf("ValidateEmail: token = %s, code = %s", validationRequest.Token, validationRequest.VerificationCode)
-
-		user, expireTime, verificationCode, err := storage.RegistrationDAO().FindRegistration(validationRequest.Token)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't find registration record.", err)
-			return
-		}
-
-		response, err := checkCorrectnessCode(expireTime, currentTime, verificationCode, validationRequest.VerificationCode)
-		responseJSON, errJSON := json.Marshal(response)
-		if errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errJSON)
-			return
-		}
-
-		var returnCode int
-		if err == nil {
-			returnCode = http.StatusOK
-			if errAdd := storage.UserDAO().AddUser(&user); errAdd != nil {
-				utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't add user into database.", errAdd)
-				return
-			}
-		} else {
-			returnCode = http.StatusBadRequest
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(returnCode)
-		writer.Write([]byte(responseJSON))
-	}
+	return http.StatusOK, &ValidateEmailResponse{}
 }

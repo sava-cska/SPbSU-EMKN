@@ -2,30 +2,31 @@ package accounts
 
 import (
 	"fmt"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"net/http"
 
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 )
 
 func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext) (int, *LoginResponse) {
+	context.Logger.Debugf("Login: start with login = %s, password = %s", loginRequest.Login, loginRequest.Password)
+
 	isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, context.Storage)
 	if err != nil {
-		context.Logger.Error("Failed to validate user credentials", err)
+		context.Logger.Errorf("Login: failed to validate user credentials, %s", err)
 		return http.StatusInternalServerError, &LoginResponse{}
 	}
 
-	var statusCode int
-	var response LoginResponse
 	if !isValid {
-		statusCode = http.StatusBadRequest
-		response = LoginResponse{Errors: &ErrorsUnion{InvalidLoginOrPassword: &Error{}}}
+		context.Logger.Errorf("Login: incorrect credentials")
+		return http.StatusBadRequest, &LoginResponse{
+			Errors: &ErrorsUnion{
+				InvalidLoginOrPassword: &Error{},
+			},
+		}
 	} else {
-		statusCode = http.StatusOK
-		response = LoginResponse{}
+		return http.StatusOK, &LoginResponse{}
 	}
-
-	return statusCode, &response
 }
 
 // ValidateUserCredentials returns tuple (is credentials valid, error if internal error happened)

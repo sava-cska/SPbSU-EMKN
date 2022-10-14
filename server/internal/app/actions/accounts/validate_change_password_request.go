@@ -5,5 +5,4 @@ type ValidateChangePasswordRequest struct {
 	VerificationCode string `json:"verification_code"`
 }
 
-func (response ValidateChangePasswordRequest) Bind() {
-}
+func (response ValidateChangePasswordRequest) Bind() {}

@@ -5,5 +5,4 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func (response LoginRequest) Bind() {
-}
+func (response LoginRequest) Bind() {}

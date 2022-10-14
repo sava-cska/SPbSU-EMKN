@@ -5,5 +5,4 @@ type ValidateChangePasswordResponse struct {
 	Errors              *ErrorsUnion `json:"errors,omitempty"`
 }
 
-func (response ValidateChangePasswordResponse) Bind() {
-}
+func (response ValidateChangePasswordResponse) Bind() {}

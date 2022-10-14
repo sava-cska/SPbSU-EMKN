@@ -8,5 +8,4 @@ type RegisterRequest struct {
 	LastName  string `json:"last_name"`
 }
 
-func (request RegisterRequest) Bind() {
-}
+func (request RegisterRequest) Bind() {}

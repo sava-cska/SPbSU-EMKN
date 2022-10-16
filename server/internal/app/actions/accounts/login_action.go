@@ -2,15 +2,19 @@ package accounts
 
 import (
 	"fmt"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"net/http"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 )
 
 func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext) (int, *LoginResponse) {
 	context.Logger.Debugf("Login: start with login = %s, password = %s", loginRequest.Login, loginRequest.Password)
 
+	user, err := context.Storage.UserDAO().FindUserByLogin(loginRequest.Login)
+	if err != nil {
+		return http.StatusInternalServerError, &LoginResponse{}
+	}
 	isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, context.Storage)
 	if err != nil {
 		context.Logger.Errorf("Login: failed to validate user credentials, %s", err)
@@ -24,8 +28,9 @@ func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.Depende
 				InvalidLoginOrPassword: &Error{},
 			},
 		}
-	} else {
-		return http.StatusOK, &LoginResponse{}
+	}
+	return http.StatusOK, &LoginResponse{
+		ProfileId: &user.ProfileId,
 	}
 }
 

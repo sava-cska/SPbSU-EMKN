@@ -2,16 +2,16 @@ package storage
 
 import (
 	"database/sql"
-
 	_ "github.com/lib/pq"
 )
 
 type Storage struct {
 	config            *Config
 	Db                *sql.DB
-	userDao           *UserDAO
-	registrationDao   *RegistrationDAO
-	changePasswordDao *ChangePasswordDao
+	userDAO           *UserDAO
+	registrationDAO   *RegistrationDAO
+	changePasswordDAO *ChangePasswordDAO
+	userAvatarDAO     *UserAvatarDAO
 }
 
 func New(config *Config) *Storage {
@@ -31,29 +31,39 @@ func (storage *Storage) Open() error {
 	storage.Db = db
 	return nil
 }
+
 func (storage *Storage) UserDAO() *UserDAO {
-	if storage.userDao == nil {
-		storage.userDao = &UserDAO{
+	if storage.userDAO == nil {
+		storage.userDAO = &UserDAO{
 			Storage: storage,
 		}
 	}
-	return storage.userDao
+	return storage.userDAO
 }
 
 func (storage *Storage) RegistrationDAO() *RegistrationDAO {
-	if storage.registrationDao == nil {
-		storage.registrationDao = &RegistrationDAO{
+	if storage.registrationDAO == nil {
+		storage.registrationDAO = &RegistrationDAO{
 			Storage: storage,
 		}
 	}
-	return storage.registrationDao
+	return storage.registrationDAO
 }
 
-func (storage *Storage) ChangePasswordDao() *ChangePasswordDao {
-	if storage.changePasswordDao == nil {
-		storage.changePasswordDao = &ChangePasswordDao{
+func (storage *Storage) ChangePasswordDAO() *ChangePasswordDAO {
+	if storage.changePasswordDAO == nil {
+		storage.changePasswordDAO = &ChangePasswordDAO{
 			Storage: storage,
 		}
 	}
-	return storage.changePasswordDao
+	return storage.changePasswordDAO
+}
+
+func (storage *Storage) UserAvatarDAO() *UserAvatarDAO {
+	if storage.userAvatarDAO == nil {
+		storage.userAvatarDAO = &UserAvatarDAO{
+			Storage: storage,
+		}
+	}
+	return storage.userAvatarDAO
 }

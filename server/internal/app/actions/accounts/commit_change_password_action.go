@@ -14,7 +14,7 @@ func HandleAccountsCommitChangePassword(request *CommitChangePasswordRequest,
 
 	currentTime := time.Now()
 
-	login, changePasswordExpiredTime, errDB := context.Storage.ChangePasswordDao().FindPwdToken(request.ChangePasswordToken)
+	login, changePasswordExpiredTime, errDB := context.Storage.ChangePasswordDAO().FindPwdToken(request.ChangePasswordToken)
 	if errDB != nil {
 		context.Logger.Errorf("CommitChangePassword: can't find record with token = %s in change_password_base, %s",
 			request.ChangePasswordToken, errDB)

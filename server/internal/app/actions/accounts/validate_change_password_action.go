@@ -19,7 +19,7 @@ func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest
 		return statusCode, &ValidateChangePasswordResponse{}
 	}
 
-	correctVerificationCode, expiresAt, err := context.Storage.ChangePasswordDao().GetVerificationCodeInfo(request.RandomToken)
+	correctVerificationCode, expiresAt, err := context.Storage.ChangePasswordDAO().GetVerificationCodeInfo(request.RandomToken)
 	if err != nil {
 		return returnErr(http.StatusInternalServerError, "Failed to get verification code from change_password_base", err)
 	}
@@ -49,7 +49,7 @@ func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest
 	token := internal_data.GenerateToken()
 	context.Logger.Debugf("ValidateChangePassword: token = %s", token)
 
-	err = context.Storage.ChangePasswordDao().SetChangePasswordToken(request.RandomToken,
+	err = context.Storage.ChangePasswordDAO().SetChangePasswordToken(request.RandomToken,
 		time.Now().Add(internal_data.TokenTTL), token)
 	if err != nil {
 		return returnErr(http.StatusInternalServerError, "Failed to store changePasswordToken in change_password_base", err)

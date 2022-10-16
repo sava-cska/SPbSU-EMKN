@@ -4,12 +4,12 @@ import (
 	"time"
 )
 
-type ChangePasswordDao struct {
+type ChangePasswordDAO struct {
 	Storage *Storage
 }
 
 // GetVerificationCodeInfo returns (if verification code is valid, expiresAt, error). Returns empty string if not found
-func (cpd *ChangePasswordDao) GetVerificationCodeInfo(identificationToken string) (string, *time.Time, error) {
+func (cpd *ChangePasswordDAO) GetVerificationCodeInfo(identificationToken string) (string, *time.Time, error) {
 	row := cpd.Storage.Db.QueryRow(
 		`SELECT verification_code, expire_date
                FROM change_password_base
@@ -24,7 +24,7 @@ func (cpd *ChangePasswordDao) GetVerificationCodeInfo(identificationToken string
 }
 
 // SetChangePasswordToken remembers changePasswordToken for identificationToken issued in accounts/begin_change_password
-func (cpd *ChangePasswordDao) SetChangePasswordToken(identificationToken string, changeTime time.Time,
+func (cpd *ChangePasswordDAO) SetChangePasswordToken(identificationToken string, changeTime time.Time,
 	changePasswordToken string) error {
 	_, err := cpd.Storage.Db.Exec(
 		`UPDATE change_password_base 
@@ -39,7 +39,7 @@ func (cpd *ChangePasswordDao) SetChangePasswordToken(identificationToken string,
 	return err
 }
 
-func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime time.Time,
+func (cpd *ChangePasswordDAO) Upsert(token string, login string, expiredTime time.Time,
 	verificationCode string) error {
 	_, err := cpd.Storage.Db.Exec(
 		`
@@ -51,7 +51,7 @@ func (cpd *ChangePasswordDao) Upsert(token string, login string, expiredTime tim
 	return err
 }
 
-func (cpd *ChangePasswordDao) FindTokenAndDelete(token string) (string, error) {
+func (cpd *ChangePasswordDAO) FindTokenAndDelete(token string) (string, error) {
 	tx, err := cpd.Storage.Db.Begin()
 	if err != nil {
 		return "", err
@@ -73,7 +73,7 @@ func (cpd *ChangePasswordDao) FindTokenAndDelete(token string) (string, error) {
 	return login, nil
 }
 
-func (cpd *ChangePasswordDao) FindPwdToken(changePwdToken string) (string, time.Time, error) {
+func (cpd *ChangePasswordDAO) FindPwdToken(changePwdToken string) (string, time.Time, error) {
 	changePwdRecord := cpd.Storage.Db.QueryRow(
 		`
 		SELECT login, change_password_expire_time

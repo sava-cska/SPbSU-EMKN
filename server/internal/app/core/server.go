@@ -1,18 +1,17 @@
 package core
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"math/rand"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/base"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/error_handler"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"github.com/sirupsen/logrus"
 )
@@ -99,42 +98,6 @@ func (server *Server) configureRouter() {
 
 	base.HandleAction("/accounts/revalidate_change_password_credentials", accounts.HandleAccountsRevalidateChangePasswordCredentials,
 		server.context)
-}
 
-// used before all handlers that require user authorization
-func (server *Server) withAuth(handlerFunc http.HandlerFunc, logger *logrus.Logger) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		header := request.Header.Get("Authorization")
-		if header == "" {
-			error_handler.HandleError(logger, writer, http.StatusUnauthorized, "Missing authorization header", nil)
-			return
-		}
-
-		if !strings.HasPrefix(header, "Basic") {
-			error_handler.HandleError(logger, writer, http.StatusUnauthorized, "Unsupported authorization type", nil)
-			return
-		}
-
-		authHeader := strings.TrimPrefix(header, "Basic ")
-		creds := strings.Split(authHeader, ":")
-		if len(creds) != 2 {
-			error_handler.HandleError(logger, writer, http.StatusUnauthorized, "Wrong authorization format", nil)
-			return
-		}
-		login := creds[0]
-		passwd := creds[1]
-
-		isValid, err := accounts.ValidateUserCredentials(login, passwd, server.context.Storage)
-		if err != nil {
-			error_handler.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate credentials", err)
-			return
-		}
-
-		if !isValid {
-			error_handler.HandleError(logger, writer, http.StatusUnauthorized, "Wrong login or password", nil)
-			return
-		}
-
-		handlerFunc(writer, request)
-	}
+	base.HandleActionWithAuth("/profiles/get", profiles.HandleProfilesGet, server.context)
 }

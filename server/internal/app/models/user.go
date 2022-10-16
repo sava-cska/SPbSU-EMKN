@@ -8,3 +8,10 @@ type User struct {
 	FirstName string
 	LastName  string
 }
+
+type Profile struct {
+	ProfileId int32
+	AvatarUrl string
+	FirstName string
+	LastName  string
+}

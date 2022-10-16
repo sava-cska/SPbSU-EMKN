@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-
 	_ "github.com/lib/pq"
 )
 
@@ -11,7 +10,7 @@ type Storage struct {
 	Db                *sql.DB
 	userDao           *UserDAO
 	registrationDao   *RegistrationDAO
-	changePasswordDao *ChangePasswordDao
+	changePasswordDao *ChangePasswordDAO
 }
 
 func New(config *Config) *Storage {
@@ -31,6 +30,7 @@ func (storage *Storage) Open() error {
 	storage.Db = db
 	return nil
 }
+
 func (storage *Storage) UserDAO() *UserDAO {
 	if storage.userDao == nil {
 		storage.userDao = &UserDAO{
@@ -49,9 +49,9 @@ func (storage *Storage) RegistrationDAO() *RegistrationDAO {
 	return storage.registrationDao
 }
 
-func (storage *Storage) ChangePasswordDao() *ChangePasswordDao {
+func (storage *Storage) ChangePasswordDao() *ChangePasswordDAO {
 	if storage.changePasswordDao == nil {
-		storage.changePasswordDao = &ChangePasswordDao{
+		storage.changePasswordDao = &ChangePasswordDAO{
 			Storage: storage,
 		}
 	}

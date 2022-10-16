@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"math/rand"
 	"net/http"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/error_handler"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sirupsen/logrus"
 )
 

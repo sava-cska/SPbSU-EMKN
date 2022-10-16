@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
@@ -59,14 +58,14 @@ func (dao *UserDAO) FindUser(email string) (models.User, error) {
 func (dao *UserDAO) FindUserByLogin(login string) (models.User, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
-		SELECT login, password, email, first_name, last_name
+		SELECT login, password, email, profile_id, first_name, last_name
 		FROM user_base
 		WHERE login = $1
 		`,
 		login)
 
 	var user models.User
-	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
+	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.ProfileId, &user.FirstName, &user.LastName)
 	return user, err
 }
 

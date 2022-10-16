@@ -1,34 +1,35 @@
 package accounts
 
 import (
-	"encoding/json"
-	"fmt"
-	"html"
 	"net/http"
-	"net/mail"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-
-	"github.com/sirupsen/logrus"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
-func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
+func HandleAccountsRegister(request *RegisterRequest, context *dependency.DependencyContext) (int, *RegisterResponse) {
+	context.Logger.Debugf("Register: %s %s with email = %s, login = %s, password = %s", request.FirstName, request.LastName,
+		request.Email, request.Login, request.Password)
+
 	validate := func(request *RegisterRequest) (int, *ErrorsUnion) {
-		if len(request.Login) == 0 {
+		if !internal_data.ValidateLogin(request.Login) {
+			context.Logger.Errorf("Register: invalid login = %s", request.Login)
 			return http.StatusBadRequest, &ErrorsUnion{
 				IllegalLogin: &Error{},
 			}
 		}
-		if len(request.Password) == 0 {
+		if !internal_data.ValidatePassword(request.Password) {
+			context.Logger.Errorf("Register: invalid password = %s", request.Password)
 			return http.StatusBadRequest, &ErrorsUnion{
 				IllegalPassword: &Error{},
 			}
 		}
-		if _, err := mail.ParseAddress(request.Email); err != nil {
+		if !internal_data.ValidateEmail(request.Email) {
+			context.Logger.Errorf("Register: invalid email = %s", request.Email)
 			return http.StatusBadRequest, &ErrorsUnion{
 				IllegalEmail: &Error{},
 			}
@@ -42,70 +43,50 @@ func HandleAccountsRegister(logger *logrus.Logger, storage *storage.Storage, mai
 				Errors: errors,
 			}
 		}
-		if storage.UserDAO().ExistsLogin(request.Login) {
+		if context.Storage.UserDAO().ExistsLogin(request.Login) {
+			context.Logger.Errorf("Register: login = %s already exist", request.Login)
 			return http.StatusBadRequest, &RegisterResponse{
 				Errors: &ErrorsUnion{LoginIsNotAvailable: &Error{}},
 			}
 		}
-		if storage.UserDAO().ExistsEmail(request.Email) {
+		if context.Storage.UserDAO().ExistsEmail(request.Email) {
+			context.Logger.Errorf("Register: email = %s already exist", request.Email)
 			return http.StatusBadRequest, &RegisterResponse{
 				Errors: &ErrorsUnion{EmailIsNotAvailable: &Error{}},
 			}
 		}
 
-		token := utils.GenerateToken()
-		verificationCode := utils.GenerateVerificationCode()
-		storage.RegistrationDAO().Upsert(
+		token := internal_data.GenerateToken()
+		verificationCode := notifier.GenerateVerificationCode()
+		context.Logger.Debugf("Register: token = %s, verificationCode = %s", token, verificationCode)
+
+		context.Storage.RegistrationDAO().Upsert(
 			token,
-			request,
-			time.Now().Add(utils.TokenTTL),
+			&models.User{
+				Login:     request.Login,
+				Password:  request.Password,
+				Email:     request.Email,
+				FirstName: request.FirstName,
+				LastName:  request.LastName,
+			},
+			time.Now().Add(internal_data.TokenTTL),
 			verificationCode,
 		)
 
 		go func() {
-			err := mailer.SendEmail([]string{request.Email}, buildMessage(verificationCode, request.FirstName, request.LastName))
-			if err != nil {
-				logger.Error("Can't send email to %s, %s", request.Email, err.Error())
+			if err := context.Mailer.SendEmail([]string{request.Email}, notifier.BuildMessage(verificationCode,
+				request.FirstName, request.LastName)); err != nil {
+				context.Logger.Errorf("Register: can't send email to %s, %s", request.Email, err)
 			}
 		}()
 
 		return http.StatusOK, &RegisterResponse{
 			Response: &RegisterWrapper{
 				RandomToken: token,
-				ExpiresIn:   strconv.Itoa(int(utils.ResentCodeIn.Seconds())),
+				ExpiresIn:   strconv.Itoa(int(internal_data.ResentCodeIn.Seconds())),
 			},
 		}
 	}
 
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsRegister - Called URI %s", request.RequestURI)
-
-		var registerRequest RegisterRequest
-		if errJSON := utils.ParseBody(interface{}(&registerRequest), request); errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse /accounts/register request.", errJSON)
-			return
-		}
-
-		code, resp := handleAccountsRegister(&registerRequest)
-
-		respJSON, errRespJSON := json.Marshal(resp)
-		if errRespJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errRespJSON)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(code)
-		writer.Write(respJSON)
-	}
-}
-
-func buildMessage(verificationCode string, firstName string, lastName string) notifier.Message {
-	return notifier.Message{
-		Subject: "Код подтверждения",
-		Body: fmt.Sprintf("<html><body>Здравствуйте, %s %s!<br>Код подтверждения: <b>%s</b></body></html>",
-			html.EscapeString(firstName),
-			html.EscapeString(lastName),
-			verificationCode),
-	}
+	return handleAccountsRegister(request)
 }

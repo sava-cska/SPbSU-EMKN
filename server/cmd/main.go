@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-	server "github.com/sava-cska/SPbSU-EMKN/internal/app"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core"
 )
 
 var (
@@ -19,14 +19,14 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := server.NewConfig()
+	config := core.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := server.New(config)
+	s := core.New(config)
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}

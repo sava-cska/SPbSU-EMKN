@@ -3,7 +3,7 @@ package storage
 import (
 	"database/sql"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/users"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
 type UserDAO struct {
@@ -34,7 +34,7 @@ func (dao *UserDAO) ExistsEmail(email string) bool {
 	return err != sql.ErrNoRows
 }
 
-func (dao *UserDAO) AddUser(user *users.User) error {
+func (dao *UserDAO) AddUser(user *models.User) error {
 	_, err := dao.Storage.Db.Exec(
 		`INSERT INTO user_base (login, password, email, first_name, last_name)
                VALUES ($1, $2, $3, $4, $5)`,
@@ -42,7 +42,7 @@ func (dao *UserDAO) AddUser(user *users.User) error {
 	return err
 }
 
-func (dao *UserDAO) FindUser(email string) (users.User, error) {
+func (dao *UserDAO) FindUser(email string) (models.User, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT login, password, email, first_name, last_name
@@ -51,12 +51,12 @@ func (dao *UserDAO) FindUser(email string) (users.User, error) {
 		`,
 		email)
 
-	var user users.User
+	var user models.User
 	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
 	return user, err
 }
 
-func (dao *UserDAO) FindUserByLogin(login string) (users.User, error) {
+func (dao *UserDAO) FindUserByLogin(login string) (models.User, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT login, password, email, first_name, last_name
@@ -65,7 +65,7 @@ func (dao *UserDAO) FindUserByLogin(login string) (users.User, error) {
 		`,
 		login)
 
-	var user users.User
+	var user models.User
 	err := row.Scan(&user.Login, &user.Password, &user.Email, &user.FirstName, &user.LastName)
 	return user, err
 }

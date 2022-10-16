@@ -9,3 +9,5 @@ type RegisterResponse struct {
 	Errors   *ErrorsUnion     `json:"errors,omitempty"`
 	Response *RegisterWrapper `json:"response,omitempty"`
 }
+
+func (response RegisterResponse) Bind() {}

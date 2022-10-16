@@ -1,76 +1,60 @@
 package accounts
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
-func HandleAccountsRevalidateRegistrationCredentials(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
+func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistrationCredentialsRequest,
+	context *dependency.DependencyContext) (int, *RevalidateRegistrationCredentialsResponse) {
+	context.Logger.Debugf("RevalidateRegistrationCredentials: start with token = %s", request.Token)
+
 	handleAccountsRevalidateRegistrationCredentials :=
 		func(request *RevalidateRegistrationCredentialsRequest) (int, *RevalidateRegistrationCredentialsResponse) {
-			user, _, _, err := storage.RegistrationDAO().FindRegistrationAndDelete(request.Token)
+			user, _, _, err := context.Storage.RegistrationDAO().FindRegistrationAndDelete(request.Token)
 			if err != nil {
+				context.Logger.Errorf("RevalidateRegistrationCredentials: can't find and delete record in registration_base")
 				return http.StatusInternalServerError, &RevalidateRegistrationCredentialsResponse{}
 			}
-			if storage.UserDAO().ExistsLogin(user.Login) {
+			context.Logger.Debugf("RevalidateRegistrationCredentials: find user with login = %s", user.Login)
+			if context.Storage.UserDAO().ExistsLogin(user.Login) {
+				context.Logger.Errorf("RevalidateRegistrationCredentials: login = %s already exist", user.Login)
 				return http.StatusBadRequest, &RevalidateRegistrationCredentialsResponse{Errors: &ErrorsUnion{
 					InvalidRegistrationRevalidation: &Error{}},
 				}
 			}
-			token := utils.GenerateToken()
-			verificationCode := utils.GenerateVerificationCode()
-			storage.RegistrationDAO().Upsert(
+
+			token := internal_data.GenerateToken()
+			verificationCode := notifier.GenerateVerificationCode()
+			context.Logger.Debugf("RevalidateRegistrationCredentials: token = %s, verificationCode = %s", token, verificationCode)
+
+			context.Storage.RegistrationDAO().Upsert(
 				token,
 				&user,
-				time.Now().Add(utils.TokenTTL),
+				time.Now().Add(internal_data.TokenTTL),
 				verificationCode,
 			)
 
 			go func() {
-				err := mailer.SendEmail([]string{user.Email}, buildMessage(verificationCode, user.FirstName, user.LastName))
+				err := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode, user.FirstName,
+					user.LastName))
 				if err != nil {
-					logger.Debugf(err.Error())
+					context.Logger.Debugf("RevalidateRegistrationCredentials: can't send email to %s, %s", user.Email, err)
 				}
 			}()
 
 			return http.StatusOK, &RevalidateRegistrationCredentialsResponse{
 				Response: &RevalidateRegistrationCredentialsWrapper{
 					RandomToken: token,
-					ExpiresIn:   strconv.Itoa(int(utils.ResentCodeIn.Seconds())),
+					ExpiresIn:   strconv.Itoa(int(internal_data.ResentCodeIn.Seconds())),
 				},
 			}
 		}
 
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsRevalidateRegistrationCredentials - Called URI %s", request.RequestURI)
-
-		var revalidateRegistrationCredentialsRequest RevalidateRegistrationCredentialsRequest
-		if errJSON := utils.ParseBody(interface{}(&revalidateRegistrationCredentialsRequest), request); errJSON != nil {
-			utils.HandleError(logger,
-				writer,
-				http.StatusBadRequest,
-				"Can't parse /accounts/revalidate_registration_credentials request.",
-				errJSON)
-			return
-		}
-
-		code, resp := handleAccountsRevalidateRegistrationCredentials(&revalidateRegistrationCredentialsRequest)
-
-		respJSON, errRespJSON := json.Marshal(resp)
-		if errRespJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errRespJSON)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(code)
-		writer.Write(respJSON)
-	}
+	return handleAccountsRevalidateRegistrationCredentials(request)
 }

@@ -1,78 +1,50 @@
 package accounts
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/notifier"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
-func startChangePassword(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer,
-	email string) ([]byte, int, error) {
-	user, errFindUser := storage.UserDAO().FindUser(email)
+func HandleAccountsBeginChangePassword(request *BeginChangePasswordRequest,
+	context *dependency.DependencyContext) (int, *BeginChangePasswordResponse) {
+	context.Logger.Debugf("BeginChangePassword: start with email = %s", request.Email)
+
+	user, errFindUser := context.Storage.UserDAO().FindUser(request.Email)
 	if errFindUser != nil {
-		response := ChangePwdResponse{Errors: &ErrorsUnion{IllegalEmail: &Error{}}}
-		responseJSON, errJSON := json.Marshal(response)
-		if errJSON != nil {
-			logger.Error("Can't create JSON object from data.")
-			return []byte{}, 0, errJSON
+		context.Logger.Errorf("BeginChangePassword: can't find user in user_base, %s", errFindUser)
+		return http.StatusBadRequest, &BeginChangePasswordResponse{
+			Errors: &ErrorsUnion{
+				IllegalEmail: &Error{},
+			},
 		}
-		return responseJSON, http.StatusInternalServerError, nil
 	}
 
-	token := utils.GenerateToken()
-	verificationCode := utils.GenerateVerificationCode()
-	logger.Debugf("Login = %s, email = %s, token = %s, verificationCode = %s", user.Login, user.Email,
-		token, verificationCode)
+	token := internal_data.GenerateToken()
+	verificationCode := notifier.GenerateVerificationCode()
+	context.Logger.Debugf("BeginChangePassword: token = %s, verificationCode = %s", token, verificationCode)
 
 	go func() {
-		if errEmail := mailer.SendEmail([]string{email}, buildMessage(verificationCode,
+		if errEmail := context.Mailer.SendEmail([]string{request.Email}, notifier.BuildMessage(verificationCode,
 			user.FirstName, user.LastName)); errEmail != nil {
-			logger.Error("Can't send email to %s, %s", email, errEmail.Error())
+			context.Logger.Errorf("BeginChangePassword: can't send email to %s, %s", request.Email, errEmail)
 		}
 	}()
 
-	if errDB := storage.ChangePasswordDao().Upsert(token, user.Login, time.Now().Add(utils.TokenTTL),
+	if errDB := context.Storage.ChangePasswordDao().Upsert(token, user.Login, time.Now().Add(internal_data.TokenTTL),
 		verificationCode); errDB != nil {
-		logger.Error("Can't add record to change_password_base.")
-		return []byte{}, 0, errDB
+		context.Logger.Errorf("BeginChangePassword: can't add record to change_password_base, %s", errDB)
+		return http.StatusInternalServerError, &BeginChangePasswordResponse{}
 	}
 
-	successResponse := ChangePwdResponse{
-		Response: &ChangePwdWrapper{
+	return http.StatusOK, &BeginChangePasswordResponse{
+		Response: &BeginChangePasswordWrapper{
 			Token:       token,
-			TimeExpired: strconv.Itoa(int(utils.ResentCodeIn.Seconds()))}}
-	successResponseJSON, errJSON := json.Marshal(successResponse)
-	if errJSON != nil {
-		logger.Error("Can't create JSON object from data.")
-		return []byte{}, 0, errJSON
-	}
-	return successResponseJSON, http.StatusOK, nil
-}
-
-func HandleAccountsChangePwd(logger *logrus.Logger, storage *storage.Storage, mailer *notifier.Mailer) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsChangePwd - Called URI %s", request.RequestURI)
-
-		var changePwdRequest ChangePwdRequest
-		if errJSON := utils.ParseBody(interface{}(&changePwdRequest), request); errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Can't parse /accounts/begin_change_password request.", errJSON)
-			return
-		}
-
-		responseBody, returnCode, err := startChangePassword(logger, storage, mailer, changePwdRequest.Email)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't start process of changing password.", err)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(returnCode)
-		writer.Write(responseBody)
+			TimeExpired: strconv.Itoa(int(internal_data.ResentCodeIn.Seconds())),
+		},
 	}
 }

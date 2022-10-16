@@ -1,5 +1,11 @@
 package accounts
 
-import "github.com/sava-cska/SPbSU-EMKN/internal/app/users"
+type RegisterRequest struct {
+	Login     string `json:"login"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
 
-type RegisterRequest = users.User
+func (request RegisterRequest) Bind() {}

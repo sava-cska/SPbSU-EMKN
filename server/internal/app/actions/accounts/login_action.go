@@ -1,50 +1,31 @@
 package accounts
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
-	"github.com/sava-cska/SPbSU-EMKN/internal/utils"
-	"github.com/sirupsen/logrus"
 )
 
-func HandleAccountsLogin(logger *logrus.Logger, storage *storage.Storage) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		logger.Debugf("HandleAccountsLogin - Called URI %s", request.RequestURI)
+func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext) (int, *LoginResponse) {
+	context.Logger.Debugf("Login: start with login = %s, password = %s", loginRequest.Login, loginRequest.Password)
 
-		var loginRequest LoginRequest
-		if err := utils.ParseBody(interface{}(&loginRequest), request); err != nil {
-			utils.HandleError(logger, writer, http.StatusBadRequest, "Failed to parse request body", err)
-			return
+	isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, context.Storage)
+	if err != nil {
+		context.Logger.Errorf("Login: failed to validate user credentials, %s", err)
+		return http.StatusInternalServerError, &LoginResponse{}
+	}
+
+	if !isValid {
+		context.Logger.Errorf("Login: incorrect credentials")
+		return http.StatusBadRequest, &LoginResponse{
+			Errors: &ErrorsUnion{
+				InvalidLoginOrPassword: &Error{},
+			},
 		}
-
-		isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, storage)
-		if err != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Failed to validate user credentials", err)
-			return
-		}
-
-		var returnCode int
-		var response LoginResponse
-		if !isValid {
-			returnCode = http.StatusBadRequest
-			response = LoginResponse{Errors: &ErrorsUnion{InvalidLoginOrPassword: &Error{}}}
-		} else {
-			returnCode = http.StatusOK
-			response = LoginResponse{}
-		}
-
-		responseJSON, errJSON := json.Marshal(response)
-		if errJSON != nil {
-			utils.HandleError(logger, writer, http.StatusInternalServerError, "Can't create JSON object from data.", errJSON)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(returnCode)
-		writer.Write(responseJSON)
+	} else {
+		return http.StatusOK, &LoginResponse{}
 	}
 }
 

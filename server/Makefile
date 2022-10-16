@@ -1,14 +1,11 @@
 .PHONY: build
 build:
-	go build -o main -v ./cmd
-
-.PHONY: build-win
-build-win:
-	go build -o main.exe -v ./cmd
+	go mod tidy
+	go build -o main.out -v ./cmd
 
 .PHONY: deploy
 deploy:
-	scp -r * ${VM_CLOUD_INTERSECTION_ROOT_PATH}/server
+	rsync -av -e ssh --exclude='*.out' . ${VM_CLOUD_INTERSECTION_ROOT_PATH}/server
 
 .PHONY: test
 test:

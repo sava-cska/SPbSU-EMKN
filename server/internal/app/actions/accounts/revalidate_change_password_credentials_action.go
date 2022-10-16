@@ -20,7 +20,7 @@ func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChange
 		return statusCode, &RevalidateChangePasswordCredentialsResponse{}
 	}
 
-	login, err := context.Storage.ChangePasswordDao().FindTokenAndDelete(request.RandomToken)
+	login, err := context.Storage.ChangePasswordDAO().FindTokenAndDelete(request.RandomToken)
 	if err != nil {
 		context.Logger.Errorf("RevalidateChangePasswordCredentials: can't find and delete record with token = %s",
 			request.RandomToken)
@@ -48,7 +48,7 @@ func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChange
 		}
 	}()
 
-	if errDB := context.Storage.ChangePasswordDao().Upsert(newToken, user.Login, time.Now().Add(internal_data.TokenTTL),
+	if errDB := context.Storage.ChangePasswordDAO().Upsert(newToken, user.Login, time.Now().Add(internal_data.TokenTTL),
 		verificationCode); errDB != nil {
 		return returnErr(http.StatusInternalServerError, "Can't add record to change_password_base", errDB)
 	}

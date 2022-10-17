@@ -9,7 +9,8 @@ import (
 )
 
 func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest,
-	context *dependency.DependencyContext) (int, *ValidateChangePasswordResponse) {
+	context *dependency.DependencyContext,
+	_ ...any) (int, *ValidateChangePasswordResponse) {
 	context.Logger.Debugf("ValidateChangePassword: start with verificationCode = %s", request.VerificationCode)
 
 	currentTime := time.Now()

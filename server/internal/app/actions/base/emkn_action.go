@@ -16,7 +16,7 @@ import (
 
 func HandleActionWithAuth[Req Request, Res Response](
 	path string,
-	businessLogicHandler func(*Req, *dependency.DependencyContext) (int, *Res),
+	businessLogicHandler func(*Req, *dependency.DependencyContext, ...any) (int, *Res),
 	context *dependency.DependencyContext,
 ) {
 	handleAction(path, businessLogicHandler, context, withAuth)
@@ -24,7 +24,7 @@ func HandleActionWithAuth[Req Request, Res Response](
 
 func HandleAction[Req Request, Res Response](
 	path string,
-	businessLogicHandler func(*Req, *dependency.DependencyContext) (int, *Res),
+	businessLogicHandler func(*Req, *dependency.DependencyContext, ...any) (int, *Res),
 	context *dependency.DependencyContext,
 ) {
 	handleAction(path, businessLogicHandler, context, EMPTY)
@@ -32,14 +32,14 @@ func HandleAction[Req Request, Res Response](
 
 func handleAction[Req Request, Res Response](
 	path string,
-	businessLogicHandler func(*Req, *dependency.DependencyContext) (int, *Res),
+	businessLogicHandler func(*Req, *dependency.DependencyContext, ...any) (int, *Res),
 	context *dependency.DependencyContext,
-	middleware func(responseWriter http.ResponseWriter, httpRequest *http.Request, context *dependency.DependencyContext) error,
+	middleware func(responseWriter http.ResponseWriter, httpRequest *http.Request, context *dependency.DependencyContext) (any, error),
 ) {
 	handlerFunc := func(responseWriter http.ResponseWriter, httpRequest *http.Request) {
 		context.Logger.Debugf("%s - Called URI %s", path, httpRequest.RequestURI)
 
-		err := middleware(responseWriter, httpRequest, context)
+		val, err := middleware(responseWriter, httpRequest, context)
 		if err != nil {
 			return
 		}
@@ -52,7 +52,7 @@ func handleAction[Req Request, Res Response](
 
 		context.Logger.Debugf("%s\n\trequest: %s", path, render.AsCode(request))
 
-		code, response := businessLogicHandler(&request, context)
+		code, response := businessLogicHandler(&request, context, val)
 
 		respJSON, errRespJSON := json.Marshal(response)
 		if errRespJSON != nil {
@@ -69,22 +69,22 @@ func handleAction[Req Request, Res Response](
 	context.Router.HandleFunc(path, handlerFunc)
 }
 
-var EMPTY = func(http.ResponseWriter, *http.Request, *dependency.DependencyContext) error { return nil }
+var EMPTY = func(http.ResponseWriter, *http.Request, *dependency.DependencyContext) (any, error) { return "", nil }
 
 func withAuth(responseWriter http.ResponseWriter,
 	httpRequest *http.Request,
-	context *dependency.DependencyContext) error {
+	context *dependency.DependencyContext) (any, error) {
 	header := httpRequest.Header.Get("Authorization")
 	if header == "" {
 		err := errors.New("missing authorization header")
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusUnauthorized, err.Error(), err)
-		return err
+		return "", err
 	}
 
 	if !strings.HasPrefix(header, "Basic") {
 		err := errors.New("unsupported authorization type")
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusUnauthorized, err.Error(), err)
-		return err
+		return "", err
 	}
 
 	authHeader := strings.TrimPrefix(header, "Basic ")
@@ -94,14 +94,14 @@ func withAuth(responseWriter http.ResponseWriter,
 	if err != nil {
 		err := errors.New("wrong authorization format")
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusUnauthorized, err.Error(), err)
-		return err
+		return "", err
 	}
 
 	creds := strings.Split(string(parsed), ":")
 	if len(creds) != 2 {
 		err := errors.New("wrong authorization format")
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusUnauthorized, err.Error(), err)
-		return err
+		return "", err
 	}
 	login := creds[0]
 	passwd := creds[1]
@@ -109,13 +109,13 @@ func withAuth(responseWriter http.ResponseWriter,
 	isValid, err := accounts.ValidateUserCredentials(login, passwd, context.Storage)
 	if err != nil {
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusInternalServerError, "Failed to validate credentials", err)
-		return err
+		return "", err
 	}
 
 	if !isValid {
 		err := errors.New("wrong login or password")
 		error_handler.HandleError(context.Logger, responseWriter, http.StatusUnauthorized, err.Error(), err)
-		return err
+		return "", err
 	}
-	return nil
+	return login, nil
 }

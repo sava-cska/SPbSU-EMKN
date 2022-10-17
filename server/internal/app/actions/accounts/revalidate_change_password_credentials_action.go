@@ -12,7 +12,8 @@ import (
 )
 
 func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChangePasswordCredentialsRequest,
-	context *dependency.DependencyContext) (int, *RevalidateChangePasswordCredentialsResponse) {
+	context *dependency.DependencyContext,
+	_ ...any) (int, *RevalidateChangePasswordCredentialsResponse) {
 	context.Logger.Debugf("RevalidateChangePasswordCredentials: start with token = %s", request.RandomToken)
 
 	returnErr := func(statusCode int, reason string, err error) (int, *RevalidateChangePasswordCredentialsResponse) {

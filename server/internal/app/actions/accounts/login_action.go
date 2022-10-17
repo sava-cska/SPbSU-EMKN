@@ -8,7 +8,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
-func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext) (int, *LoginResponse) {
+func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext, _ ...any) (int, *LoginResponse) {
 	context.Logger.Debugf("Login: start with login = %s, password = %s", loginRequest.Login, loginRequest.Password)
 
 	user, err := context.Storage.UserDAO().FindUserByLogin(loginRequest.Login)

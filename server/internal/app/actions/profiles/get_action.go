@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContext) (int, *GetResponse) {
+func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContext, _ ...any) (int, *GetResponse) {
 	if request.ProfileIds == nil || len(request.ProfileIds) == 0 {
 		return http.StatusOK, &GetResponse{}
 	}

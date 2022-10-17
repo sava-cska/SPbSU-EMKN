@@ -11,7 +11,8 @@ import (
 )
 
 func HandleAccountsBeginChangePassword(request *BeginChangePasswordRequest,
-	context *dependency.DependencyContext) (int, *BeginChangePasswordResponse) {
+	context *dependency.DependencyContext,
+	_ ...any) (int, *BeginChangePasswordResponse) {
 	context.Logger.Debugf("BeginChangePassword: start with email = %s", request.Email)
 
 	user, errFindUser := context.Storage.UserDAO().FindUser(request.Email)

@@ -1,0 +1,16 @@
+package courses
+
+import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"net/http"
+)
+
+func HandleCoursesPeriods(request *PeriodsRequest, context *dependency.DependencyContext, _ ...any) (int, *PeriodsResponse) {
+	periods, err := context.Storage.CoursesDAO().GetPeriods()
+	if err != nil {
+		context.Logger.Errorf("Failed to get periods from db: %s", err.Error())
+		return http.StatusBadRequest, &PeriodsResponse{}
+	}
+
+	return http.StatusOK, &PeriodsResponse{&PeriodsResponseWrapper { Periods: periods} }
+}

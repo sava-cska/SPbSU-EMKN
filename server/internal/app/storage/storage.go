@@ -12,6 +12,7 @@ type Storage struct {
 	registrationDAO   *RegistrationDAO
 	changePasswordDAO *ChangePasswordDAO
 	userAvatarDAO     *UserAvatarDAO
+	coursesDAO        *CoursesDAO
 }
 
 func New(config *Config) *Storage {
@@ -66,4 +67,13 @@ func (storage *Storage) UserAvatarDAO() *UserAvatarDAO {
 		}
 	}
 	return storage.userAvatarDAO
+}
+
+func (storage *Storage) CoursesDAO() *CoursesDAO {
+	if storage.coursesDAO == nil {
+		storage.coursesDAO = &CoursesDAO{
+			Storage: storage,
+		}
+	}
+	return storage.coursesDAO
 }

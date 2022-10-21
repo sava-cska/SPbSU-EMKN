@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"math/rand"
@@ -91,8 +92,9 @@ func (server *Server) configureRouter() {
 		server.context)
 	base.HandleAction("/accounts/revalidate_change_password_credentials", accounts.HandleAccountsRevalidateChangePasswordCredentials,
 		server.context)
-
 	base.HandleActionWithAuth("/profiles/get", profiles.HandleProfilesGet, server.context)
 	base.HandleActionWithAuth("/profiles/load_image", profiles.HandleProfilesLoadImage, server.context)
-
+	base.HandleActionWithAuth("/courses/periods", courses.HandleCoursesPeriods, server.context)
+	base.HandleActionWithAuth("/courses/description", courses.HandleCoursesDescription, server.context)
+	base.HandleActionWithAuth("/courses/description_ping", courses.HandleCoursesDescriptionPing, server.context)
 }

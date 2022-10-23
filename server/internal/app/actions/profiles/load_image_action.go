@@ -10,13 +10,13 @@ import (
 
 func HandleProfilesLoadImage(request *LoadImageRequest, context *dependency.DependencyContext, args ...any) (int, *LoadImageResponse) {
 	if v, ok := args[0].(string); ok {
-		return handlePriflesLoadImage(request, context, v)
+		return handleProfilesLoadImage(request, context, v)
 	} else {
 		return http.StatusInternalServerError, &LoadImageResponse{}
 	}
 }
 
-func handlePriflesLoadImage(request *LoadImageRequest, context *dependency.DependencyContext, login string) (int, *LoadImageResponse) {
+func handleProfilesLoadImage(request *LoadImageRequest, context *dependency.DependencyContext, login string) (int, *LoadImageResponse) {
 	decodedJpg, err := base64.StdEncoding.DecodeString(request.EncodedJpg)
 	if err != nil {
 		return http.StatusBadRequest, &LoadImageResponse{}

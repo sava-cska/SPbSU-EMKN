@@ -7,7 +7,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
-func HandleAccountsValidateEmail(request *ValidateEmailRequest, context *dependency.DependencyContext) (int, *ValidateEmailResponse) {
+func HandleAccountsValidateEmail(request *ValidateEmailRequest, context *dependency.DependencyContext, _ ...any) (int, *ValidateEmailResponse) {
 	context.Logger.Debugf("ValidateEmail: start with verificationCode = %s", request.VerificationCode)
 
 	currentTime := time.Now()

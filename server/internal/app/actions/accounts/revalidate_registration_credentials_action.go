@@ -11,7 +11,8 @@ import (
 )
 
 func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistrationCredentialsRequest,
-	context *dependency.DependencyContext) (int, *RevalidateRegistrationCredentialsResponse) {
+	context *dependency.DependencyContext,
+	_ ...any) (int, *RevalidateRegistrationCredentialsResponse) {
 	context.Logger.Debugf("RevalidateRegistrationCredentials: start with token = %s", request.Token)
 
 	handleAccountsRevalidateRegistrationCredentials :=

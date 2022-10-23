@@ -11,7 +11,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
-func HandleAccountsRegister(request *RegisterRequest, context *dependency.DependencyContext) (int, *RegisterResponse) {
+func HandleAccountsRegister(request *RegisterRequest, context *dependency.DependencyContext, _ ...any) (int, *RegisterResponse) {
 	context.Logger.Debugf("Register: %s %s with email = %s, login = %s, password = %s", request.FirstName, request.LastName,
 		request.Email, request.Login, request.Password)
 

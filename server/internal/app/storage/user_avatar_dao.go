@@ -40,3 +40,16 @@ func (dao *UserAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, 
 
 	return profiles, err
 }
+
+func (dao *UserAvatarDAO) UpdateProfile(profile models.Profile) error {
+	_, err := dao.Storage.Db.Exec(`INSERT INTO
+			   user_avatar_base (profile_id, avatar_url, first_name, last_name)
+		       VALUES ($1, $2, $3, $4)
+		       ON CONFLICT (profile_id) DO UPDATE SET avatar_url = EXCLUDED.avatar_url`,
+		profile.ProfileId,
+		profile.AvatarUrl,
+		profile.FirstName,
+		profile.LastName,
+	)
+	return err
+}

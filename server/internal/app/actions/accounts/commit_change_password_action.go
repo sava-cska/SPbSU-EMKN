@@ -9,7 +9,8 @@ import (
 )
 
 func HandleAccountsCommitChangePassword(request *CommitChangePasswordRequest,
-	context *dependency.DependencyContext) (int, *CommitChangePasswordResponse) {
+	context *dependency.DependencyContext,
+	_ ...any) (int, *CommitChangePasswordResponse) {
 	context.Logger.Debugf("CommitChangePassword: start with new_password = %s", request.NewPassword)
 
 	currentTime := time.Now()

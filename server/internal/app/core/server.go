@@ -82,22 +82,17 @@ func (server *Server) configureMailing(EmknCourseMail, EmknCoursePassword string
 
 func (server *Server) configureRouter() {
 	base.HandleAction("/accounts/register", accounts.HandleAccountsRegister, server.context)
-
 	base.HandleAction("/accounts/validate_email", accounts.HandleAccountsValidateEmail, server.context)
-
 	base.HandleAction("/accounts/login", accounts.HandleAccountsLogin, server.context)
-
 	base.HandleAction("/accounts/begin_change_password", accounts.HandleAccountsBeginChangePassword, server.context)
-
 	base.HandleAction("/accounts/validate_change_password", accounts.HandleAccountsValidateChangePassword, server.context)
-
 	base.HandleAction("/accounts/commit_change_password", accounts.HandleAccountsCommitChangePassword, server.context)
-
 	base.HandleAction("/accounts/revalidate_registration_credentials", accounts.HandleAccountsRevalidateRegistrationCredentials,
 		server.context)
-
 	base.HandleAction("/accounts/revalidate_change_password_credentials", accounts.HandleAccountsRevalidateChangePasswordCredentials,
 		server.context)
 
 	base.HandleActionWithAuth("/profiles/get", profiles.HandleProfilesGet, server.context)
+	base.HandleActionWithAuth("/profiles/load_image", profiles.HandleProfilesLoadImage, server.context)
+
 }

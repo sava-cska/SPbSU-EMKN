@@ -19,5 +19,5 @@ func HandleCoursesDescriptionPing(request *DescriptionPingRequest, context *depe
 
 	println("%d %d", timestamp.UnixMilli(), request.LastSyncTime)
 	changed := timestamp.UnixMilli() > request.LastSyncTime
-	return http.StatusOK, &DescriptionPingResponse{Response: &DescriptionPingResponseWrapper { Changed: &changed} }
+	return http.StatusOK, &DescriptionPingResponse{Response: &DescriptionPingResponseWrapper{Changed: &changed}}
 }

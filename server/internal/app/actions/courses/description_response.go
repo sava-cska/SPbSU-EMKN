@@ -6,7 +6,7 @@ type DescriptionResponseWrapper struct {
 
 type DescriptionResponse struct {
 	Response *DescriptionResponseWrapper `json:"response,omitempty"`
-	Errors      *ErrorsUnion `json:"errors,omitempty"`
+	Errors   *ErrorsUnion                `json:"errors,omitempty"`
 }
 
 func (d DescriptionResponse) Bind() {}

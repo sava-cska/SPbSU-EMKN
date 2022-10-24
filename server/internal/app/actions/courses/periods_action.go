@@ -24,5 +24,5 @@ func HandleCoursesPeriods(request *PeriodsRequest, context *dependency.Dependenc
 		}
 	}
 
-	return http.StatusOK, &PeriodsResponse{&PeriodsResponseWrapper { Periods: periods} }
+	return http.StatusOK, &PeriodsResponse{&PeriodsResponseWrapper{Periods: periods}}
 }

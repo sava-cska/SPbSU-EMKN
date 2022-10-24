@@ -7,7 +7,7 @@ type PeriodsResponseWrapper struct {
 }
 
 type PeriodsResponse struct {
-	Response *PeriodsResponseWrapper
+	Response *PeriodsResponseWrapper `json:"response"`
 }
 
 func (p PeriodsResponse) Bind() {}

@@ -17,5 +17,5 @@ func HandleCoursesDescription(request *DescriptionRequest, context *dependency.D
 		}
 	}
 
-	return http.StatusOK, &DescriptionResponse{Response: &DescriptionResponseWrapper{ Description: *description}}
+	return http.StatusOK, &DescriptionResponse{Response: &DescriptionResponseWrapper{Description: *description}}
 }

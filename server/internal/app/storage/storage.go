@@ -8,16 +8,26 @@ import (
 type Storage struct {
 	config            *Config
 	Db                *sql.DB
+	generalDAO        *GeneralDAO
 	userDAO           *UserDAO
 	registrationDAO   *RegistrationDAO
 	changePasswordDAO *ChangePasswordDAO
 	userAvatarDAO     *UserAvatarDAO
+	coursesDAO        *CoursesDAO
 }
 
 func New(config *Config) *Storage {
-	return &Storage{
+	s := &Storage{
 		config: config,
 	}
+	s.generalDAO = &GeneralDAO{s}
+	s.userDAO = &UserDAO{s}
+	s.registrationDAO = &RegistrationDAO{s}
+	s.changePasswordDAO = &ChangePasswordDAO{s}
+	s.userAvatarDAO = &UserAvatarDAO{s}
+	s.coursesDAO = &CoursesDAO{s}
+
+	return s
 }
 
 func (storage *Storage) Open() error {
@@ -32,38 +42,26 @@ func (storage *Storage) Open() error {
 	return nil
 }
 
+func (storage *Storage) GeneralDAO() *GeneralDAO {
+	return storage.generalDAO
+}
+
 func (storage *Storage) UserDAO() *UserDAO {
-	if storage.userDAO == nil {
-		storage.userDAO = &UserDAO{
-			Storage: storage,
-		}
-	}
 	return storage.userDAO
 }
 
 func (storage *Storage) RegistrationDAO() *RegistrationDAO {
-	if storage.registrationDAO == nil {
-		storage.registrationDAO = &RegistrationDAO{
-			Storage: storage,
-		}
-	}
 	return storage.registrationDAO
 }
 
 func (storage *Storage) ChangePasswordDAO() *ChangePasswordDAO {
-	if storage.changePasswordDAO == nil {
-		storage.changePasswordDAO = &ChangePasswordDAO{
-			Storage: storage,
-		}
-	}
 	return storage.changePasswordDAO
 }
 
 func (storage *Storage) UserAvatarDAO() *UserAvatarDAO {
-	if storage.userAvatarDAO == nil {
-		storage.userAvatarDAO = &UserAvatarDAO{
-			Storage: storage,
-		}
-	}
 	return storage.userAvatarDAO
+}
+
+func (storage *Storage) CoursesDAO() *CoursesDAO {
+	return storage.coursesDAO
 }

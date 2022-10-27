@@ -28,3 +28,14 @@ func (dao *StudentToCourseDAO) ExistRecord(profileId uint32, courseId uint32) (b
 		return false, err
 	}
 }
+
+func (dao *StudentToCourseDAO) AddRecord(profileId uint32, courseId uint32) error {
+	_, err := dao.Storage.Db.Exec(
+		`
+		INSERT INTO student_to_course_base
+		(profile_id, course_id)
+		VALUES ($1, $2)
+		`,
+		profileId, courseId)
+	return err
+}

@@ -54,7 +54,7 @@ func HandleCoursesList(request *ListRequest, context *dependency.DependencyConte
 	user, errUser := context.Storage.UserDAO().FindUserByLogin(login)
 	if errUser != nil {
 		context.Logger.Errorf("List: can't find user with login = %s, %s", login, errUser)
-		return http.StatusBadRequest, &ListResponse{}
+		return http.StatusInternalServerError, &ListResponse{}
 	}
 
 	context.Logger.Debugf("List: start with periods = %v for user = %s", request.Periods, login)

@@ -97,3 +97,25 @@ func (dao *CourseDAO) GetCoursesByPeriod(periodId uint32) ([]*models.CourseInDB,
 
 	return courses, nil
 }
+
+func (dao *CourseDAO) ExistCourse(courseId uint32) (bool, error) {
+	row := dao.Storage.Db.QueryRow(
+		`
+		SELECT id
+		FROM course_base
+		WHERE id = $1
+		`,
+		courseId,
+	)
+	var id uint32
+	err := row.Scan(&id)
+
+	switch err {
+	case nil:
+		return true, nil
+	case sql.ErrNoRows:
+		return false, nil
+	default:
+		return false, err
+	}
+}

@@ -1,9 +1,6 @@
 package core
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"math/rand"
 	"net/http"
 	"os"
@@ -12,8 +9,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/base"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sirupsen/logrus"
 )
 
@@ -97,4 +97,5 @@ func (server *Server) configureRouter() {
 	base.HandleActionWithAuth("/courses/periods", courses.HandleCoursesPeriods, server.context)
 	base.HandleActionWithAuth("/courses/description", courses.HandleCoursesDescription, server.context)
 	base.HandleActionWithAuth("/courses/description_ping", courses.HandleCoursesDescriptionPing, server.context)
+	base.HandleActionWithAuth("/courses/list", courses.HandleCoursesList, server.context)
 }

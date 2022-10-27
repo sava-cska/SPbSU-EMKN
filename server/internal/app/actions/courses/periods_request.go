@@ -1,6 +1,5 @@
 package courses
 
-type PeriodsRequest struct {
-}
+type PeriodsRequest struct{}
 
 func (p PeriodsRequest) Bind() {}

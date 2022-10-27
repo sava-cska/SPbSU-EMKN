@@ -2,18 +2,20 @@ package storage
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq"
 )
 
 type Storage struct {
-	config            *Config
-	Db                *sql.DB
-	generalDAO        *GeneralDAO
-	userDAO           *UserDAO
-	registrationDAO   *RegistrationDAO
-	changePasswordDAO *ChangePasswordDAO
-	userAvatarDAO     *UserAvatarDAO
-	coursesDAO        *CoursesDAO
+	config             *Config
+	Db                 *sql.DB
+	generalDAO         *GeneralDAO
+	userDAO            *UserDAO
+	registrationDAO    *RegistrationDAO
+	changePasswordDAO  *ChangePasswordDAO
+	userAvatarDAO      *UserAvatarDAO
+	courseDAO          *CourseDAO
+	periodDAO          *PeriodDAO
+	teacherToCourseDAO *TeacherToCourseDAO
+	studentToCourseDAO *StudentToCourseDAO
 }
 
 func New(config *Config) *Storage {
@@ -25,8 +27,10 @@ func New(config *Config) *Storage {
 	s.registrationDAO = &RegistrationDAO{s}
 	s.changePasswordDAO = &ChangePasswordDAO{s}
 	s.userAvatarDAO = &UserAvatarDAO{s}
-	s.coursesDAO = &CoursesDAO{s}
-
+	s.courseDAO = &CourseDAO{s}
+	s.periodDAO = &PeriodDAO{s}
+	s.teacherToCourseDAO = &TeacherToCourseDAO{s}
+	s.studentToCourseDAO = &StudentToCourseDAO{s}
 	return s
 }
 
@@ -62,6 +66,18 @@ func (storage *Storage) UserAvatarDAO() *UserAvatarDAO {
 	return storage.userAvatarDAO
 }
 
-func (storage *Storage) CoursesDAO() *CoursesDAO {
-	return storage.coursesDAO
+func (storage *Storage) CourseDAO() *CourseDAO {
+	return storage.courseDAO
+}
+
+func (storage *Storage) PeriodDAO() *PeriodDAO {
+	return storage.periodDAO
+}
+
+func (storage *Storage) TeacherToCourseDAO() *TeacherToCourseDAO {
+	return storage.teacherToCourseDAO
+}
+
+func (storage *Storage) StudentToCourseDAO() *StudentToCourseDAO {
+	return storage.studentToCourseDAO
 }

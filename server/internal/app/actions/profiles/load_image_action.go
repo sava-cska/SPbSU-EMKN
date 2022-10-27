@@ -2,10 +2,11 @@ package profiles
 
 import (
 	"encoding/base64"
+	"net/http"
+
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/data_saver"
-	"net/http"
 )
 
 func HandleProfilesLoadImage(request *LoadImageRequest, context *dependency.DependencyContext, args ...any) (int, *LoadImageResponse) {

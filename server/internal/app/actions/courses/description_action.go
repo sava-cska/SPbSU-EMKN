@@ -1,12 +1,13 @@
 package courses
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"net/http"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
 func HandleCoursesDescription(request *DescriptionRequest, context *dependency.DependencyContext, _ ...any) (int, *DescriptionResponse) {
-	description, err := context.Storage.CoursesDAO().GetDescription(request.Id)
+	description, err := context.Storage.CourseDAO().GetDescription(request.Id)
 	if err != nil {
 		context.Logger.Errorf("Failed to get course description for course id %d: %s", request.Id, err.Error())
 		return http.StatusBadRequest, &DescriptionResponse{}

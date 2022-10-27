@@ -1,9 +1,10 @@
 package profiles
 
 import (
+	"net/http"
+
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
-	"net/http"
 )
 
 func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContext, _ ...any) (int, *GetResponse) {

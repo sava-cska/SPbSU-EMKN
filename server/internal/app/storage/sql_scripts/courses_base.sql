@@ -1,8 +1,8 @@
-CREATE TABLE courses_base (
+CREATE TABLE course_base (
     id serial PRIMARY KEY,
     title text,
-    periods_id integer,
+    period_id integer,
     short_description text,
     description_timestamp timestamp,
-    FOREIGN KEY(periods_id) REFERENCES periods_base(id)
+    FOREIGN KEY(period_id) REFERENCES period_base(id)
 );

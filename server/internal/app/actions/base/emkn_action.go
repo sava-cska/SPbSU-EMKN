@@ -4,11 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"net/http"
 	"strings"
 
 	"github.com/gdexlab/go-render/render"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/error_handler"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/http_parser"

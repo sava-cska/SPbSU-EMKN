@@ -1,12 +1,13 @@
 package courses
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"net/http"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
 func HandleCoursesDescriptionPing(request *DescriptionPingRequest, context *dependency.DependencyContext, _ ...any) (int, *DescriptionPingResponse) {
-	timestamp, err := context.Storage.CoursesDAO().GetDescriptionTimestamp(request.Id)
+	timestamp, err := context.Storage.CourseDAO().GetDescriptionTimestamp(request.Id)
 	if err != nil {
 		context.Logger.Errorf("Failed to get course description timestamp for course id %d: %s", request.Id, err.Error())
 		return http.StatusBadRequest, &DescriptionPingResponse{}

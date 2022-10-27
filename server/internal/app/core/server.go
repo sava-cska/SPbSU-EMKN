@@ -99,4 +99,5 @@ func (server *Server) configureRouter() {
 	base.HandleActionWithAuth("/courses/description_ping", courses.HandleCoursesDescriptionPing, server.context)
 	base.HandleActionWithAuth("/courses/list", courses.HandleCoursesList, server.context)
 	base.HandleActionWithAuth("/courses/enroll", courses.HandleCoursesEnroll, server.context)
+	base.HandleActionWithAuth("/courses/unenroll", courses.HandleCoursesUnEnroll, server.context)
 }

@@ -43,12 +43,13 @@ func HandleCoursesEnroll(request *EnrollRequest, context *dependency.DependencyC
 		return http.StatusInternalServerError, &EnrollResponse{}
 	}
 	if exist {
-		context.Logger.Errorf("Enroll: used %s already enrolled to course %d", login, request.CourseId)
+		context.Logger.Errorf("Enroll: user %s already enrolled to course %d", login, request.CourseId)
 		return http.StatusBadRequest, &EnrollResponse{Errors: &ErrorsUnion{AlreadyEnrolled: &Error{}}}
 	}
 
 	if errAdd := context.Storage.StudentToCourseDAO().AddRecord(user.ProfileId, request.CourseId); errAdd != nil {
 		context.Logger.Errorf("Enroll: error in adding (%d, %d) into student_to_course_base", user.ProfileId, request.CourseId)
+		return http.StatusInternalServerError, &EnrollResponse{}
 	}
 
 	return http.StatusOK, &EnrollResponse{}

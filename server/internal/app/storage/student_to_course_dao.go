@@ -39,3 +39,15 @@ func (dao *StudentToCourseDAO) AddRecord(profileId uint32, courseId uint32) erro
 		profileId, courseId)
 	return err
 }
+
+func (dao *StudentToCourseDAO) DeleteRecord(profileId uint32, courseId uint32) error {
+	_, err := dao.Storage.Db.Exec(
+		`
+		DELETE FROM student_to_course_base
+		WHERE profile_id = $1 AND course_id = $2
+		`,
+		profileId,
+		courseId,
+	)
+	return err
+}

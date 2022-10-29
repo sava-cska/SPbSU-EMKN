@@ -2,10 +2,10 @@ package accounts
 
 import (
 	"fmt"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"net/http"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 )
 
 func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext, _ ...any) (int, *LoginResponse) {

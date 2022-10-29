@@ -2,5 +2,4 @@ package profiles
 
 type Error struct{}
 
-type ErrorsUnion struct {
-}
+type ErrorsUnion struct{}

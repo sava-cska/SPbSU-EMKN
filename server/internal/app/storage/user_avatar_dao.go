@@ -2,9 +2,10 @@ package storage
 
 import (
 	"fmt"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"strconv"
 	"strings"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
 type UserAvatarDAO struct {

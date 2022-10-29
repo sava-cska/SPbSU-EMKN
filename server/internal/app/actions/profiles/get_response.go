@@ -1,7 +1,7 @@
 package profiles
 
 type Profile struct {
-	Id        int32  `json:"id"`
+	Id        uint32 `json:"id"`
 	AvatarUrl string `json:"avatar_url"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`

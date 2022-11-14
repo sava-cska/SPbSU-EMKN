@@ -1,6 +1,7 @@
 .PHONY: build
 build:
 	go mod tidy
+	swag init -g cmd/main.go
 	go build -o main.out -v ./cmd
 
 .PHONY: deploy

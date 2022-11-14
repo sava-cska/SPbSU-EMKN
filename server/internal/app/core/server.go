@@ -1,12 +1,14 @@
 package core
 
 import (
+	httpSwagger "github.com/swaggo/http-swagger"
 	"math/rand"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "github.com/sava-cska/SPbSU-EMKN/docs"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/base"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
@@ -47,6 +49,7 @@ func (server *Server) Start() error {
 
 	// important to have configured other entities before configure router
 	server.configureRouter()
+	server.context.Router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	server.context.Logger.Info("Server is up")
 	return http.ListenAndServe(server.config.BindAddress, server.context.Router)
 }

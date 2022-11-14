@@ -6,6 +6,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Unenroll course
+// @Tags courses
+// @Accept  json
+// @Produce  json
+// @Param request body UnEnrollRequest true "Unenroll course"
+// @Success 200 {object} UnEnrollResponse
+// @Router /courses/unenroll [post]
 func HandleCoursesUnEnroll(request *UnEnrollRequest, context *dependency.DependencyContext,
 	extraParameters ...any) (int, *UnEnrollResponse) {
 	if len(extraParameters) == 0 {

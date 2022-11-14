@@ -10,6 +10,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
+// CreateOrder godoc
+// @Summary Revalidate creds
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body RevalidateRegistrationCredentialsRequest true "Revalidate creds"
+// @Success 200 {object} RevalidateRegistrationCredentialsResponse
+// @Router /accounts/revalidate_registration_credentials [post]
 func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistrationCredentialsRequest,
 	context *dependency.DependencyContext,
 	_ ...any) (int, *RevalidateRegistrationCredentialsResponse) {

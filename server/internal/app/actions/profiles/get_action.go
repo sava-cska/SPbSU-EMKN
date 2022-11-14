@@ -7,6 +7,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
+// CreateOrder godoc
+// @Summary Get profile
+// @Tags profiles
+// @Accept  json
+// @Produce  json
+// @Param request body GetRequest true "Get profile"
+// @Success 200 {object} GetResponse
+// @Router /profiles/get [post]
 func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContext, _ ...any) (int, *GetResponse) {
 	if request.ProfileIds == nil || len(request.ProfileIds) == 0 {
 		return http.StatusOK, &GetResponse{}

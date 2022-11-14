@@ -7,6 +7,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Validate email code
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body ValidateEmailRequest true "Validate email code"
+// @Success 200 {object} ValidateEmailResponse
+// @Router /accounts/validate_email [post]
 func HandleAccountsValidateEmail(request *ValidateEmailRequest, context *dependency.DependencyContext, _ ...any) (int, *ValidateEmailResponse) {
 	context.Logger.Debugf("ValidateEmail: start with verificationCode = %s", request.VerificationCode)
 

@@ -8,6 +8,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
 )
 
+// CreateOrder godoc
+// @Summary Commit change password
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body CommitChangePasswordRequest true "Commit change password"
+// @Success 200 {object} CommitChangePasswordResponse
+// @Router /accounts/commit_change_password [post]
 func HandleAccountsCommitChangePassword(request *CommitChangePasswordRequest,
 	context *dependency.DependencyContext,
 	_ ...any) (int, *CommitChangePasswordResponse) {

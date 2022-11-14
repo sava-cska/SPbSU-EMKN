@@ -11,6 +11,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
+// CreateOrder godoc
+// @Summary Revalidate changing password
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body RevalidateChangePasswordCredentialsRequest true "Revalidate changing password"
+// @Success 200 {object} RevalidateChangePasswordCredentialsResponse
+// @Router /accounts/revalidate_change_password_credentials [post]
 func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChangePasswordCredentialsRequest,
 	context *dependency.DependencyContext,
 	_ ...any) (int, *RevalidateChangePasswordCredentialsResponse) {

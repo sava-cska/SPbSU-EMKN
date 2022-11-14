@@ -16,6 +16,13 @@ func init() {
 	flag.StringVar(&configPath, "config-path", "configs/config.toml", "path to config file")
 }
 
+// @title EMKN API
+// @version 1.0
+// @description This is a backend for EMKN app
+// @contact.name API Support
+// @contact.email https://t.me/Intellec2aI
+// @host localhost:8080
+// @BasePath /
 func main() {
 	flag.Parse()
 

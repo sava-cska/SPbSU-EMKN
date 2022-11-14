@@ -8,6 +8,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
 )
 
+// CreateOrder godoc
+// @Summary Validate change password
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body ValidateChangePasswordRequest true "Validate change password"
+// @Success 200 {object} ValidateChangePasswordResponse
+// @Router /accounts/validate_change_password [post]
 func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest,
 	context *dependency.DependencyContext,
 	_ ...any) (int, *ValidateChangePasswordResponse) {

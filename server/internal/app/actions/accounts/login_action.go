@@ -8,6 +8,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Login
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body LoginRequest true "Login"
+// @Success 200 {object} LoginResponse
+// @Router /accounts/login [post]
 func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.DependencyContext, _ ...any) (int, *LoginResponse) {
 	context.Logger.Debugf("Login: start with login = %s, password = %s", loginRequest.Login, loginRequest.Password)
 

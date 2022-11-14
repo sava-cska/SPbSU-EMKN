@@ -39,6 +39,14 @@ func collectCoursesByPeriod(context *dependency.DependencyContext, periodId uint
 	return &CoursesByPeriod{PeriodId: periodId, Courses: coursesInResponse}, nil
 }
 
+// CreateOrder godoc
+// @Summary List courses
+// @Tags courses
+// @Accept  json
+// @Produce  json
+// @Param request body ListRequest true "List courses"
+// @Success 200 {object} ListResponse
+// @Router /courses/list [post]
 func HandleCoursesList(request *ListRequest, context *dependency.DependencyContext, extraParameters ...any) (int, *ListResponse) {
 	if len(extraParameters) == 0 {
 		context.Logger.Errorf("List: don't get login of current user")

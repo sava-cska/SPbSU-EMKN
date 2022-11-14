@@ -6,6 +6,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Enroll course
+// @Tags courses
+// @Accept  json
+// @Produce  json
+// @Param request body EnrollRequest true "Enroll course"
+// @Success 200 {object} EnrollResponse
+// @Router /courses/enroll [post]
 func HandleCoursesEnroll(request *EnrollRequest, context *dependency.DependencyContext, extraParameters ...any) (int, *EnrollResponse) {
 	if len(extraParameters) == 0 {
 		context.Logger.Errorf("Enroll: don't get login of current user")

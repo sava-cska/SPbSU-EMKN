@@ -11,6 +11,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
+// CreateOrder godoc
+// @Summary Register account
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body RegisterRequest true "Register account"
+// @Success 200 {object} RegisterResponse
+// @Router /accounts/register [post]
 func HandleAccountsRegister(request *RegisterRequest, context *dependency.DependencyContext, _ ...any) (int, *RegisterResponse) {
 	context.Logger.Debugf("Register: %s %s with email = %s, login = %s, password = %s", request.FirstName, request.LastName,
 		request.Email, request.Login, request.Password)

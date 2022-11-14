@@ -6,6 +6,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Ping course description
+// @Tags courses
+// @Accept  json
+// @Produce  json
+// @Param request body DescriptionPingRequest true "Ping course description"
+// @Success 200 {object} DescriptionPingResponse
+// @Router /courses/description_ping [post]
 func HandleCoursesDescriptionPing(request *DescriptionPingRequest, context *dependency.DependencyContext, _ ...any) (int, *DescriptionPingResponse) {
 	timestamp, err := context.Storage.CourseDAO().GetDescriptionTimestamp(request.Id)
 	if err != nil {

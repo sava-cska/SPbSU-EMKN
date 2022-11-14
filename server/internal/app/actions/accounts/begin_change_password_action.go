@@ -10,6 +10,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 )
 
+// CreateOrder godoc
+// @Summary Begin change password
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param request body BeginChangePasswordRequest true "Begin change password"
+// @Success 200 {object} BeginChangePasswordResponse
+// @Router /accounts/begin_change_password [post]
 func HandleAccountsBeginChangePassword(request *BeginChangePasswordRequest,
 	context *dependency.DependencyContext,
 	_ ...any) (int, *BeginChangePasswordResponse) {

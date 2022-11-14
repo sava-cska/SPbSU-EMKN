@@ -6,6 +6,14 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 )
 
+// CreateOrder godoc
+// @Summary Get course periods
+// @Tags courses
+// @Accept  json
+// @Produce  json
+// @Param request body PeriodsRequest true "Get course periods"
+// @Success 200 {object} PeriodsResponse
+// @Router /courses/periods [post]
 func HandleCoursesPeriods(request *PeriodsRequest, context *dependency.DependencyContext, _ ...any) (int, *PeriodsResponse) {
 	periods, err := context.Storage.CourseDAO().GetPeriods()
 	if err != nil {

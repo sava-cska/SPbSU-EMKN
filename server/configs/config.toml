@@ -2,7 +2,7 @@ bind_address = ":8080"
 log_level = "debug"
 
 [StorageConfig]
-database_url = "host=localhost dbname=postgres user=postgres password=123 sslmode=disable"
+database_url = "host=localhost dbname=postgres sslmode=disable"
 
 [NotifierConfig]
 mailer_daemon = "smtp.yandex.ru"

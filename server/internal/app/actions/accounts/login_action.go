@@ -21,7 +21,12 @@ func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.Depende
 
 	user, err := context.Storage.UserDAO().FindUserByLogin(loginRequest.Login)
 	if err != nil {
-		return http.StatusInternalServerError, &LoginResponse{}
+		context.Logger.Errorf("Login: failed to find user by login, %s", err.Error())
+		return http.StatusBadRequest, &LoginResponse{
+			Errors: &ErrorsUnion{
+				InvalidLoginOrPassword: &Error{},
+			},
+		}
 	}
 	isValid, err := ValidateUserCredentials(loginRequest.Login, loginRequest.Password, context.Storage)
 	if err != nil {

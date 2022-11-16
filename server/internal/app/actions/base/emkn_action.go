@@ -45,7 +45,7 @@ func handleAction[Req Request, Res Response](
 		}
 
 		var request Req
-		if errJSON := http_parser.ParseBody(interface{}(&request), httpRequest); errJSON != nil {
+		if errJSON := http_parser.ParseBody(interface{}(&request), httpRequest, context); errJSON != nil {
 			error_handler.HandleError(context.Logger, responseWriter, http.StatusBadRequest, "Can't parse httpRequest.", errJSON)
 			return
 		}

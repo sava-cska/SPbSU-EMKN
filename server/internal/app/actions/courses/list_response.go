@@ -1,15 +1,15 @@
 package courses
 
 type Course struct {
-	Id               uint32   `json:"id,omitempty"`
-	Title            string   `json:"title,omitempty"`
-	Enroll           bool     `json:"enrolled,omitempty"`
-	ShortDescription string   `json:"short_description,omitempty"`
-	Teachers         []uint32 `json:"teachers_profiles,omitempty"`
+	Id               uint32   `json:"id"`
+	Title            string   `json:"title"`
+	Enroll           bool     `json:"enrolled"`
+	ShortDescription string   `json:"short_description"`
+	Teachers         []uint32 `json:"teachers_profiles"`
 }
 
 type CoursesByPeriod struct {
-	PeriodId uint32    `json:"period_id,omitempty"`
+	PeriodId uint32    `json:"period_id"`
 	Courses  []*Course `json:"courses,omitempty"`
 }
 

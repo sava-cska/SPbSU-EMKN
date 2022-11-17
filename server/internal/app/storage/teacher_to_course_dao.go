@@ -1,10 +1,14 @@
 package storage
 
-type TeacherToCourseDAO struct {
-	Storage *Storage
+type TeacherToCourseDAO interface {
+	GetTeachersByCourse(courseId uint32) ([]uint32, error)
 }
 
-func (dao *TeacherToCourseDAO) GetTeachersByCourse(courseId uint32) ([]uint32, error) {
+type teacherToCourseDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *teacherToCourseDAO) GetTeachersByCourse(courseId uint32) ([]uint32, error) {
 	rows, err := dao.Storage.Db.Query(
 		`
 		SELECT profile_id

@@ -48,7 +48,7 @@ func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.Depende
 }
 
 // ValidateUserCredentials returns tuple (is credentials valid, error if internal error happened)
-func ValidateUserCredentials(login string, password string, storage *storage.Storage) (bool, error) {
+func ValidateUserCredentials(login string, password string, storage storage.Storage) (bool, error) {
 	origPassword, err := storage.UserDAO().GetPassword(login)
 	if err != nil {
 		return false, fmt.Errorf("failed to read password for login %s: %s", login, err.Error())

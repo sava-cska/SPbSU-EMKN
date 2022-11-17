@@ -8,21 +8,25 @@ import (
 	"strings"
 )
 
-type Mailer struct {
+type Mailer interface {
+	SendEmail(receivers []string, message Message) error
+}
+
+type mailerImpl struct {
 	config *Config
 	auth   smtp.Auth
 	sender string
 }
 
-func New(config *Config, EmknCourseMail, EmknCoursePassword string) *Mailer {
-	return &Mailer{
+func New(config *Config, EmknCourseMail, EmknCoursePassword string) Mailer {
+	return &mailerImpl{
 		config: config,
 		auth:   smtp.PlainAuth("", EmknCourseMail, EmknCoursePassword, config.MailerDaemon),
 		sender: EmknCourseMail,
 	}
 }
 
-func (mailer Mailer) SendEmail(receivers []string, message Message) error {
+func (mailer mailerImpl) SendEmail(receivers []string, message Message) error {
 	msg := fmt.Sprintf(`From: %s
 Subject: %s
 Content-Type: text/html; charset="UTF-8"
@@ -39,7 +43,7 @@ Content-Transfer-Encoding: base64
 		[]byte(msg))
 }
 
-func (mailer Mailer) getMailerDaemon() string {
+func (mailer mailerImpl) getMailerDaemon() string {
 	sb := strings.Builder{}
 	sb.WriteString(mailer.config.MailerDaemon)
 	sb.WriteString(":")

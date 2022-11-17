@@ -10,6 +10,6 @@ import (
 type DependencyContext struct {
 	Logger  *logrus.Logger
 	Router  *mux.Router
-	Storage *storage.Storage
-	Mailer  *notifier.Mailer
+	Storage storage.Storage
+	Mailer  notifier.Mailer
 }

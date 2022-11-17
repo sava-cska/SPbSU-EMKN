@@ -63,5 +63,5 @@ func HandleAccountsValidateChangePassword(request *ValidateChangePasswordRequest
 	if err != nil {
 		return returnErr(http.StatusInternalServerError, "Failed to store changePasswordToken in change_password_base", err)
 	}
-	return http.StatusOK, &ValidateChangePasswordResponse{ChangePasswordToken: token}
+	return http.StatusOK, &ValidateChangePasswordResponse{Response: &ValidateChangePasswordResponseWrapper{ChangePasswordToken: token}}
 }

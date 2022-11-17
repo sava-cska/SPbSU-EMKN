@@ -6,11 +6,17 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
-type RegistrationDAO struct {
-	Storage *Storage
+type RegistrationDAO interface {
+	Upsert(token string, user *models.User, expireDate time.Time, verificationCode string) error
+	FindRegistration(token string) (models.User, time.Time, string, error)
+	FindRegistrationAndDelete(token string) (models.User, time.Time, string, error)
 }
 
-func (dao *RegistrationDAO) Upsert(
+type registrationDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *registrationDAO) Upsert(
 	token string,
 	user *models.User,
 	expireDate time.Time,
@@ -32,7 +38,7 @@ func (dao *RegistrationDAO) Upsert(
 	return err
 }
 
-func (dao *RegistrationDAO) FindRegistration(token string) (models.User, time.Time, string, error) {
+func (dao *registrationDAO) FindRegistration(token string) (models.User, time.Time, string, error) {
 	registerRecord := dao.Storage.Db.QueryRow(
 		`SELECT login, password, email, first_name, last_name, expire_date, verification_code
 			   FROM registration_base WHERE token = $1`,
@@ -48,7 +54,7 @@ func (dao *RegistrationDAO) FindRegistration(token string) (models.User, time.Ti
 	return user, expireTime, verificationCode, nil
 }
 
-func (dao *RegistrationDAO) FindRegistrationAndDelete(token string) (models.User, time.Time, string, error) {
+func (dao *registrationDAO) FindRegistrationAndDelete(token string) (models.User, time.Time, string, error) {
 	tx, err := dao.Storage.Db.Begin()
 	if err != nil {
 		return models.User{}, time.Time{}, "", err

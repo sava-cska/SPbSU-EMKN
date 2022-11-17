@@ -57,7 +57,7 @@ func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChange
 		}
 	}()
 
-	if errDB := context.Storage.ChangePasswordDAO().Upsert(newToken, user.Login, time.Now().Add(internal_data.TokenTTL),
+	if errDB := context.Storage.ChangePasswordDAO().UpsertChangePasswordData(newToken, user.Login, time.Now().Add(internal_data.TokenTTL),
 		verificationCode); errDB != nil {
 		return returnErr(http.StatusInternalServerError, "Can't add record to change_password_base", errDB)
 	}

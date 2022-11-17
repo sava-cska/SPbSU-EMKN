@@ -2,11 +2,15 @@ package storage
 
 import "database/sql"
 
-type PeriodDAO struct {
-	Storage *Storage
+type PeriodDAO interface {
+	ExistPeriod(periodId uint32) (bool, error)
 }
 
-func (dao *PeriodDAO) ExistPeriod(periodId uint32) (bool, error) {
+type periodDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *periodDAO) ExistPeriod(periodId uint32) (bool, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT id

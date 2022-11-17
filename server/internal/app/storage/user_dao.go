@@ -6,11 +6,21 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
-type UserDAO struct {
-	Storage *Storage
+type UserDAO interface {
+	ExistsLogin(login string) bool
+	ExistsEmail(email string) bool
+	AddUser(user *models.User) error
+	FindUser(email string) (models.User, error)
+	FindUserByLogin(login string) (models.User, error)
+	GetPassword(login string) (string, error)
+	UpdatePassword(login string, newPassword string) error
 }
 
-func (dao *UserDAO) ExistsLogin(login string) bool {
+type userDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *userDAO) ExistsLogin(login string) bool {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT login
 			   FROM user_base
@@ -22,7 +32,7 @@ func (dao *UserDAO) ExistsLogin(login string) bool {
 	return err != sql.ErrNoRows
 }
 
-func (dao *UserDAO) ExistsEmail(email string) bool {
+func (dao *userDAO) ExistsEmail(email string) bool {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT email
 			   FROM user_base
@@ -34,7 +44,7 @@ func (dao *UserDAO) ExistsEmail(email string) bool {
 	return err != sql.ErrNoRows
 }
 
-func (dao *UserDAO) AddUser(user *models.User) error {
+func (dao *userDAO) AddUser(user *models.User) error {
 	_, err := dao.Storage.Db.Exec(
 		`INSERT INTO user_base (login, password, email, first_name, last_name)
                VALUES ($1, $2, $3, $4, $5)`,
@@ -42,7 +52,7 @@ func (dao *UserDAO) AddUser(user *models.User) error {
 	return err
 }
 
-func (dao *UserDAO) FindUser(email string) (models.User, error) {
+func (dao *userDAO) FindUser(email string) (models.User, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT login, password, email, first_name, last_name
@@ -56,7 +66,7 @@ func (dao *UserDAO) FindUser(email string) (models.User, error) {
 	return user, err
 }
 
-func (dao *UserDAO) FindUserByLogin(login string) (models.User, error) {
+func (dao *userDAO) FindUserByLogin(login string) (models.User, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT login, password, email, profile_id, first_name, last_name
@@ -70,7 +80,7 @@ func (dao *UserDAO) FindUserByLogin(login string) (models.User, error) {
 	return user, err
 }
 
-func (dao *UserDAO) GetPassword(login string) (string, error) {
+func (dao *userDAO) GetPassword(login string) (string, error) {
 	row := dao.Storage.Db.QueryRow(
 		`SELECT password
                FROM user_base
@@ -85,7 +95,7 @@ func (dao *UserDAO) GetPassword(login string) (string, error) {
 	return pwd, err
 }
 
-func (dao *UserDAO) UpdatePassword(login string, newPassword string) error {
+func (dao *userDAO) UpdatePassword(login string, newPassword string) error {
 	_, errUpdate := dao.Storage.Db.Exec(
 		`
 			UPDATE user_base

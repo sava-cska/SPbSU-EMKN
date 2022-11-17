@@ -7,11 +7,19 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
-type CourseDAO struct {
-	Storage *Storage
+type CourseDAO interface {
+	GetPeriods() ([]*models.Period, error)
+	GetDescription(courseId uint32) (*string, error)
+	GetDescriptionTimestamp(courseId uint32) (*time.Time, error)
+	GetCoursesByPeriod(periodId uint32) ([]*models.CourseInDB, error)
+	ExistCourse(courseId uint32) (bool, error)
 }
 
-func (dao *CourseDAO) GetPeriods() ([]*models.Period, error) {
+type courseDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *courseDAO) GetPeriods() ([]*models.Period, error) {
 	res, err := dao.Storage.Db.Query(
 		`SELECT id, name
                FROM period_base`,
@@ -33,7 +41,7 @@ func (dao *CourseDAO) GetPeriods() ([]*models.Period, error) {
 	return periods, nil
 }
 
-func (dao *CourseDAO) GetDescription(courseId uint32) (*string, error) {
+func (dao *courseDAO) GetDescription(courseId uint32) (*string, error) {
 	res := dao.Storage.Db.QueryRow(
 		`SELECT short_description
                FROM course_base
@@ -51,7 +59,7 @@ func (dao *CourseDAO) GetDescription(courseId uint32) (*string, error) {
 	return &description, nil
 }
 
-func (dao *CourseDAO) GetDescriptionTimestamp(courseId uint32) (*time.Time, error) {
+func (dao *courseDAO) GetDescriptionTimestamp(courseId uint32) (*time.Time, error) {
 	res := dao.Storage.Db.QueryRow(
 		`SELECT description_timestamp
                FROM course_base
@@ -69,7 +77,7 @@ func (dao *CourseDAO) GetDescriptionTimestamp(courseId uint32) (*time.Time, erro
 	return &timestamp, nil
 }
 
-func (dao *CourseDAO) GetCoursesByPeriod(periodId uint32) ([]*models.CourseInDB, error) {
+func (dao *courseDAO) GetCoursesByPeriod(periodId uint32) ([]*models.CourseInDB, error) {
 	rows, err := dao.Storage.Db.Query(
 		`
 		SELECT id, title, short_description
@@ -98,7 +106,7 @@ func (dao *CourseDAO) GetCoursesByPeriod(periodId uint32) ([]*models.CourseInDB,
 	return courses, nil
 }
 
-func (dao *CourseDAO) ExistCourse(courseId uint32) (bool, error) {
+func (dao *courseDAO) ExistCourse(courseId uint32) (bool, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT id

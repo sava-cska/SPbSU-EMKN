@@ -28,7 +28,9 @@ func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistra
 			user, _, _, err := context.Storage.RegistrationDAO().FindRegistrationAndDelete(request.Token)
 			if err != nil {
 				context.Logger.Errorf("RevalidateRegistrationCredentials: can't find and delete record in registration_base")
-				return http.StatusInternalServerError, &RevalidateRegistrationCredentialsResponse{}
+				return http.StatusBadRequest, &RevalidateRegistrationCredentialsResponse{Errors: &ErrorsUnion{
+					InvalidRegistrationRevalidation: &Error{}},
+				}
 			}
 			context.Logger.Debugf("RevalidateRegistrationCredentials: find user with login = %s", user.Login)
 			if context.Storage.UserDAO().ExistsLogin(user.Login) {

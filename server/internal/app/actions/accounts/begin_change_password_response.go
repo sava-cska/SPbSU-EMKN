@@ -1,8 +1,8 @@
 package accounts
 
 type BeginChangePasswordWrapper struct {
-	Token       string `json:"random_token,omitempty"`
-	TimeExpired string `json:"expires_in,omitempty"`
+	Token       string `json:"random_token"`
+	TimeExpired string `json:"expires_in"`
 }
 
 type BeginChangePasswordResponse struct {

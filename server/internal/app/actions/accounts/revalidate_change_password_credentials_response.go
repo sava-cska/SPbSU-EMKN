@@ -1,8 +1,8 @@
 package accounts
 
 type RevalidateChangePasswordCredentialsWrapper struct {
-	RandomToken string `json:"random_token,omitempty"`
-	ExpiresIn   string `json:"expires_in,omitempty"`
+	RandomToken string `json:"random_token"`
+	ExpiresIn   string `json:"expires_in"`
 }
 
 type RevalidateChangePasswordCredentialsResponse struct {

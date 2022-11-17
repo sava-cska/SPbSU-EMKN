@@ -1,7 +1,7 @@
 package accounts
 
 type ValidateChangePasswordResponse struct {
-	ChangePasswordToken string       `json:"change_password_token,omitempty"`
+	ChangePasswordToken string       `json:"change_password_token"`
 	Errors              *ErrorsUnion `json:"errors,omitempty"`
 }
 

@@ -130,7 +130,7 @@ func TestList(t *testing.T) {
 		sort.Slice(resp.Response.CoursesByPeriods[0].Courses, func(i, j int) bool {
 			return resp.Response.CoursesByPeriods[0].Courses[i].Id < resp.Response.CoursesByPeriods[0].Courses[j].Id
 		})
-		sort.Slice(resp.Response.CoursesByPeriods[0].Courses, func(i, j int) bool {
+		sort.Slice(resp.Response.CoursesByPeriods[1].Courses, func(i, j int) bool {
 			return resp.Response.CoursesByPeriods[1].Courses[i].Id < resp.Response.CoursesByPeriods[1].Courses[j].Id
 		})
 

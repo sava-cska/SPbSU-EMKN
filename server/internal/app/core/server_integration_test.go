@@ -6,6 +6,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage/test_storage"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -28,7 +29,8 @@ func TestRegistration(t *testing.T) {
 
 	user := db.LoginToUser["jane_doe"]
 	assert.Equal(t, "jane_doe", user.Login)
-	assert.Equal(t, "qwerty", user.Password)
+	corr, _ := pwd_hasher.ComparePasswords(user.Password, "qwerty")
+	assert.True(t, corr)
 	assert.Equal(t, id, user.ProfileId)
 	assert.Equal(t, "Jane", user.FirstName)
 	assert.Equal(t, "Doe", user.LastName)

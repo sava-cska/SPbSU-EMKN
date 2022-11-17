@@ -5,6 +5,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage/test_storage"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -27,7 +28,8 @@ func TestRegistration(t *testing.T) {
 
 	user := db.LoginToUser["jane_doe"]
 	assert.Equal(t, "jane_doe", user.Login)
-	assert.Equal(t, "qwerty", user.Password)
+	corr, _ := pwd_hasher.ComparePasswords(user.Password, "qwerty")
+	assert.True(t, corr)
 	assert.Equal(t, id, user.ProfileId)
 	assert.Equal(t, "Jane", user.FirstName)
 	assert.Equal(t, "Doe", user.LastName)
@@ -78,8 +80,9 @@ func TestParallelSameLoginRegistration(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, statusCode)
 
 	user := db.LoginToUser["jane_doe"]
+	corr, _ := pwd_hasher.ComparePasswords(user.Password, "qwerty1")
 	assert.Equal(t, "jane_doe", user.Login)
-	assert.Equal(t, "qwerty1", user.Password)
+	assert.True(t, corr)
 	assert.Equal(t, "Jane1", user.FirstName)
 	assert.Equal(t, "Doe1", user.LastName)
 	assert.Equal(t, "jane_doe1@gmail.com", user.Email)
@@ -121,7 +124,8 @@ func TestChangePassword(t *testing.T) {
 	assert.Equal(t, http.StatusOK, statusCode)
 
 	passwd, _ := db.GetPassword("jane_doe")
-	assert.Equal(t, "asdfasdf", passwd)
+	corr, _ := pwd_hasher.ComparePasswords(passwd, "asdfasdf")
+	assert.True(t, corr)
 }
 
 func TestChangePasswordWithRetry(t *testing.T) {
@@ -166,7 +170,8 @@ func TestChangePasswordWithRetry(t *testing.T) {
 	assert.Equal(t, http.StatusOK, statusCode)
 
 	passwd, _ := db.GetPassword("jane_doe")
-	assert.Equal(t, "asdfasdf", passwd)
+	corr, _ := pwd_hasher.ComparePasswords(passwd, "asdfasdf")
+	assert.True(t, corr)
 }
 
 func registerUser(user *models.User, cont *dependency.DependencyContext, db *test_storage.TestDAO, mailer *dependency.TestMailer) (bool, uint32) {

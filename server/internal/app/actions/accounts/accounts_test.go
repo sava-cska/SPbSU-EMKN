@@ -3,6 +3,7 @@ package accounts
 import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/internal_data"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage/test_storage"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -68,7 +69,8 @@ func TestCommitChangePassword(t *testing.T) {
 		assert.Equal(t, http.StatusOK, code)
 		user := db.LoginToUser["jane_doe"]
 
-		assert.Equal(t, user.Password, "asdfasdf")
+		corr, _ := pwd_hasher.ComparePasswords(user.Password, "asdfasdf")
+		assert.True(t, corr)
 	})
 
 	t.Run("Change password expired", func(t *testing.T) {
@@ -101,7 +103,8 @@ func TestCommitChangePassword(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	cont, db, _ := dependency.NewTestContext()
-	db.AddNewUser(0, "jane_doe", "qwerty", "jane.doe@gmail.com", "Jane", "Doe")
+	pwd, _ := pwd_hasher.HashPassword("qwerty")
+	db.AddNewUser(0, "jane_doe", pwd, "jane.doe@gmail.com", "Jane", "Doe")
 
 	t.Run("Successful login", func(t *testing.T) {
 

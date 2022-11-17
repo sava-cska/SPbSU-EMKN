@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"net/http"
 	"time"
 
@@ -34,6 +35,12 @@ func HandleAccountsValidateEmail(request *ValidateEmailRequest, context *depende
 	if request.VerificationCode != verificationCodeDB {
 		context.Logger.Errorf("ValidateEmail: verification code isn't correct, correct verification code = %s", verificationCodeDB)
 		return http.StatusBadRequest, &ValidateEmailResponse{Errors: &ErrorsUnion{InvalidCode: &Error{}}}
+	}
+
+	user.Password, err = pwd_hasher.HashPassword(user.Password)
+	if err != nil {
+		context.Logger.Errorf("Failed to hash password: %s", err.Error())
+		return http.StatusInternalServerError, &ValidateEmailResponse{}
 	}
 
 	if errAdd := context.Storage.UserDAO().AddUser(&user); errAdd != nil {

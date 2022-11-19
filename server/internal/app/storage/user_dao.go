@@ -2,6 +2,9 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
@@ -95,4 +98,33 @@ func (dao *UserDAO) UpdatePassword(login string, newPassword string) error {
 		`,
 		newPassword, login)
 	return errUpdate
+}
+
+func (dao *UserDAO) FindUsers(ids []int32) ([]models.User, error) {
+	var strProfileIds []string
+	for _, val := range ids {
+		strProfileIds = append(strProfileIds, strconv.Itoa(int(val)))
+	}
+	rows, err := dao.Storage.Db.Query(
+		fmt.Sprintf(`SELECT profile_id, first_name, last_name
+		FROM user_base
+		WHERE profile_id IN (%s)`, strings.Join(strProfileIds, ", ")))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ProfileId,
+			&user.FirstName,
+			&user.LastName); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, err
 }

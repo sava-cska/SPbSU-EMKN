@@ -19,6 +19,10 @@ func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContex
 	if request.ProfileIds == nil || len(request.ProfileIds) == 0 {
 		return http.StatusOK, &GetResponse{}
 	}
+	users, err := context.Storage.UserDAO().FindUsers(request.ProfileIds)
+	if err != nil {
+		return http.StatusBadRequest, &GetResponse{}
+	}
 	profiles, err := context.Storage.UserAvatarDAO().GetProfileById(request.ProfileIds)
 	if err != nil {
 		return http.StatusBadRequest, &GetResponse{}
@@ -26,20 +30,28 @@ func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContex
 
 	return http.StatusOK, &GetResponse{
 		Response: &GetWrapper{
-			Profiles: toResponse(profiles),
+			Profiles: toResponse(users, profiles),
 		},
 	}
 }
 
-func toResponse(profiles []models.Profile) *[]Profile {
+func toResponse(users []models.User, profiles []models.Profile) *[]Profile {
 	var res []Profile
-	for _, val := range profiles {
+	for _, val := range users {
 		res = append(res, Profile{
 			Id:        val.ProfileId,
-			AvatarUrl: val.AvatarUrl,
 			FirstName: val.FirstName,
 			LastName:  val.LastName,
+			AvatarUrl: "",
 		})
+	}
+	for _, val := range profiles {
+		for idx, rs := range res {
+			if rs.Id == val.ProfileId {
+				res[idx].AvatarUrl = val.AvatarUrl
+				break
+			}
+		}
 	}
 	return &res
 }

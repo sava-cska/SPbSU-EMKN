@@ -12,6 +12,4 @@ type User struct {
 type Profile struct {
 	ProfileId uint32
 	AvatarUrl string
-	FirstName string
-	LastName  string
 }

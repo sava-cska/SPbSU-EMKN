@@ -17,6 +17,7 @@ type UserDAO interface {
 	FindUserByLogin(login string) (models.User, error)
 	GetPassword(login string) (string, error)
 	UpdatePassword(login string, newPassword string) error
+	FindUsers(ids []int32) ([]models.User, error)
 }
 
 type userDAO struct {
@@ -110,7 +111,7 @@ func (dao *userDAO) UpdatePassword(login string, newPassword string) error {
 	return errUpdate
 }
 
-func (dao *UserDAO) FindUsers(ids []int32) ([]models.User, error) {
+func (dao *userDAO) FindUsers(ids []int32) ([]models.User, error) {
 	var strProfileIds []string
 	for _, val := range ids {
 		strProfileIds = append(strProfileIds, strconv.Itoa(int(val)))

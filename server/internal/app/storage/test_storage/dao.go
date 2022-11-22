@@ -46,12 +46,10 @@ func (dao *TestDAO) AddChangePwdData(data *TestChangePasswordData) {
 	dao.TokenToChangePassword[data.Token] = data
 }
 
-func (dao *TestDAO) AddUserProfile(userId uint32, avatarUrl string, fname string, lname string) {
+func (dao *TestDAO) AddUserProfile(userId uint32, avatarUrl string) {
 	dao.UserAvatars[userId] = &models.Profile{
 		ProfileId: userId,
 		AvatarUrl: avatarUrl,
-		FirstName: fname,
-		LastName:  lname,
 	}
 }
 
@@ -118,6 +116,10 @@ func (dao *TestDAO) UpdatePassword(login string, newPassword string) error {
 	} else {
 		return errors.New("not found")
 	}
+}
+
+func (dao *TestDAO) FindUsers(ids []int32) ([]models.User, error) {
+	return nil, nil
 }
 
 func (dao *TestDAO) Upsert(

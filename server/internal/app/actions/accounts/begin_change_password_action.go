@@ -44,7 +44,7 @@ func HandleAccountsBeginChangePassword(request *BeginChangePasswordRequest,
 		}
 	}()
 
-	if errDB := context.Storage.ChangePasswordDAO().Upsert(token, user.Login, time.Now().Add(internal_data.TokenTTL),
+	if errDB := context.Storage.ChangePasswordDAO().UpsertChangePasswordData(token, user.Login, time.Now().Add(internal_data.TokenTTL),
 		verificationCode); errDB != nil {
 		context.Logger.Errorf("BeginChangePassword: can't add record to change_password_base, %s", errDB)
 		return http.StatusInternalServerError, &BeginChangePasswordResponse{}

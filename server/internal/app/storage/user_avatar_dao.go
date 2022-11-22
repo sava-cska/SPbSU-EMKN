@@ -8,11 +8,16 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
 
-type UserAvatarDAO struct {
-	Storage *Storage
+type UserAvatarDAO interface {
+	GetProfileById(profileIds []int32) ([]models.Profile, error)
+	UpdateProfile(profile models.Profile) error
 }
 
-func (dao *UserAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, error) {
+type userAvatarDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *userAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, error) {
 	var strProfileIds []string
 	for _, val := range profileIds {
 		strProfileIds = append(strProfileIds, strconv.Itoa(int(val)))
@@ -42,7 +47,7 @@ func (dao *UserAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, 
 	return profiles, err
 }
 
-func (dao *UserAvatarDAO) UpdateProfile(profile models.Profile) error {
+func (dao *userAvatarDAO) UpdateProfile(profile models.Profile) error {
 	_, err := dao.Storage.Db.Exec(`INSERT INTO
 			   user_avatar_base (profile_id, avatar_url, first_name, last_name)
 		       VALUES ($1, $2, $3, $4)

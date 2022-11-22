@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"fmt"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"net/http"
 
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
@@ -48,10 +49,14 @@ func HandleAccountsLogin(loginRequest *LoginRequest, context *dependency.Depende
 }
 
 // ValidateUserCredentials returns tuple (is credentials valid, error if internal error happened)
-func ValidateUserCredentials(login string, password string, storage *storage.Storage) (bool, error) {
-	origPassword, err := storage.UserDAO().GetPassword(login)
+func ValidateUserCredentials(login string, password string, storage storage.Storage) (bool, error) {
+	origPasswordHash, err := storage.UserDAO().GetPassword(login)
 	if err != nil {
 		return false, fmt.Errorf("failed to read password for login %s: %s", login, err.Error())
 	}
-	return password == origPassword, nil
+	correct, err := pwd_hasher.ComparePasswords(origPasswordHash, password)
+	if err != nil {
+		return false, err
+	}
+	return correct, nil
 }

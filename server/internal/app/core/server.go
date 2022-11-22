@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	_ "github.com/sava-cska/SPbSU-EMKN/docs"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/accounts"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/base"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"

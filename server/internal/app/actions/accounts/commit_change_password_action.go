@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"net/http"
 	"time"
 
@@ -48,7 +49,13 @@ func HandleAccountsCommitChangePassword(request *CommitChangePasswordRequest,
 		}
 	}
 
-	if errUpdate := context.Storage.UserDAO().UpdatePassword(login, request.NewPassword); errUpdate != nil {
+	hashedPassword, err := pwd_hasher.HashPassword(request.NewPassword)
+	if err != nil {
+		context.Logger.Errorf("Failed to hash password: %s", err.Error())
+		return http.StatusInternalServerError, &CommitChangePasswordResponse{}
+	}
+
+	if errUpdate := context.Storage.UserDAO().UpdatePassword(login, hashedPassword); errUpdate != nil {
 		context.Logger.Errorf("CommitChangePassword: can't update password for login = %s in user_base", login, errUpdate)
 		return http.StatusInternalServerError, &CommitChangePasswordResponse{}
 	}

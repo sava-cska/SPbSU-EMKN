@@ -2,11 +2,17 @@ package storage
 
 import "database/sql"
 
-type StudentToCourseDAO struct {
-	Storage *Storage
+type StudentToCourseDAO interface {
+	ExistRecord(profileId uint32, courseId uint32) (bool, error)
+	AddRecord(profileId uint32, courseId uint32) error
+	DeleteRecord(profileId uint32, courseId uint32) error
 }
 
-func (dao *StudentToCourseDAO) ExistRecord(profileId uint32, courseId uint32) (bool, error) {
+type studentToCourseDAO struct {
+	Storage *DbStorage
+}
+
+func (dao *studentToCourseDAO) ExistRecord(profileId uint32, courseId uint32) (bool, error) {
 	row := dao.Storage.Db.QueryRow(
 		`
 		SELECT profile_id
@@ -29,7 +35,7 @@ func (dao *StudentToCourseDAO) ExistRecord(profileId uint32, courseId uint32) (b
 	}
 }
 
-func (dao *StudentToCourseDAO) AddRecord(profileId uint32, courseId uint32) error {
+func (dao *studentToCourseDAO) AddRecord(profileId uint32, courseId uint32) error {
 	_, err := dao.Storage.Db.Exec(
 		`
 		INSERT INTO student_to_course_base
@@ -40,7 +46,7 @@ func (dao *StudentToCourseDAO) AddRecord(profileId uint32, courseId uint32) erro
 	return err
 }
 
-func (dao *StudentToCourseDAO) DeleteRecord(profileId uint32, courseId uint32) error {
+func (dao *studentToCourseDAO) DeleteRecord(profileId uint32, courseId uint32) error {
 	_, err := dao.Storage.Db.Exec(
 		`
 		DELETE FROM student_to_course_base

@@ -5,37 +5,49 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Storage struct {
-	config             *Config
-	Db                 *sql.DB
-	generalDAO         *GeneralDAO
-	userDAO            *UserDAO
-	registrationDAO    *RegistrationDAO
-	changePasswordDAO  *ChangePasswordDAO
-	userAvatarDAO      *UserAvatarDAO
-	courseDAO          *CourseDAO
-	periodDAO          *PeriodDAO
-	teacherToCourseDAO *TeacherToCourseDAO
-	studentToCourseDAO *StudentToCourseDAO
+type Storage interface {
+	GeneralDAO() GeneralDAO
+	UserDAO() UserDAO
+	RegistrationDAO() RegistrationDAO
+	ChangePasswordDAO() ChangePasswordDAO
+	UserAvatarDAO() UserAvatarDAO
+	CourseDAO() CourseDAO
+	PeriodDAO() PeriodDAO
+	TeacherToCourseDAO() TeacherToCourseDAO
+	StudentToCourseDAO() StudentToCourseDAO
 }
 
-func New(config *Config) *Storage {
-	s := &Storage{
+type DbStorage struct {
+	config             *Config
+	Db                 *sql.DB
+	generalDAO         GeneralDAO
+	userDAO            UserDAO
+	registrationDAO    RegistrationDAO
+	changePasswordDAO  ChangePasswordDAO
+	userAvatarDAO      UserAvatarDAO
+	courseDAO          CourseDAO
+	periodDAO          PeriodDAO
+	teacherToCourseDAO TeacherToCourseDAO
+	studentToCourseDAO StudentToCourseDAO
+}
+
+func New(config *Config) *DbStorage {
+	s := &DbStorage{
 		config: config,
 	}
-	s.generalDAO = &GeneralDAO{s}
-	s.userDAO = &UserDAO{s}
-	s.registrationDAO = &RegistrationDAO{s}
-	s.changePasswordDAO = &ChangePasswordDAO{s}
-	s.userAvatarDAO = &UserAvatarDAO{s}
-	s.courseDAO = &CourseDAO{s}
-	s.periodDAO = &PeriodDAO{s}
-	s.teacherToCourseDAO = &TeacherToCourseDAO{s}
-	s.studentToCourseDAO = &StudentToCourseDAO{s}
+	s.generalDAO = &generalDAO{s}
+	s.userDAO = &userDAO{s}
+	s.registrationDAO = &registrationDAO{s}
+	s.changePasswordDAO = &changePasswordDAO{s}
+	s.userAvatarDAO = &userAvatarDAO{s}
+	s.courseDAO = &courseDAO{s}
+	s.periodDAO = &periodDAO{s}
+	s.teacherToCourseDAO = &teacherToCourseDAO{s}
+	s.studentToCourseDAO = &studentToCourseDAO{s}
 	return s
 }
 
-func (storage *Storage) Open() error {
+func (storage *DbStorage) Open() error {
 	db, err := sql.Open("postgres", storage.config.DatabaseURL)
 	if err != nil {
 		return err
@@ -47,38 +59,38 @@ func (storage *Storage) Open() error {
 	return nil
 }
 
-func (storage *Storage) GeneralDAO() *GeneralDAO {
+func (storage *DbStorage) GeneralDAO() GeneralDAO {
 	return storage.generalDAO
 }
 
-func (storage *Storage) UserDAO() *UserDAO {
+func (storage *DbStorage) UserDAO() UserDAO {
 	return storage.userDAO
 }
 
-func (storage *Storage) RegistrationDAO() *RegistrationDAO {
+func (storage *DbStorage) RegistrationDAO() RegistrationDAO {
 	return storage.registrationDAO
 }
 
-func (storage *Storage) ChangePasswordDAO() *ChangePasswordDAO {
+func (storage *DbStorage) ChangePasswordDAO() ChangePasswordDAO {
 	return storage.changePasswordDAO
 }
 
-func (storage *Storage) UserAvatarDAO() *UserAvatarDAO {
+func (storage *DbStorage) UserAvatarDAO() UserAvatarDAO {
 	return storage.userAvatarDAO
 }
 
-func (storage *Storage) CourseDAO() *CourseDAO {
+func (storage *DbStorage) CourseDAO() CourseDAO {
 	return storage.courseDAO
 }
 
-func (storage *Storage) PeriodDAO() *PeriodDAO {
+func (storage *DbStorage) PeriodDAO() PeriodDAO {
 	return storage.periodDAO
 }
 
-func (storage *Storage) TeacherToCourseDAO() *TeacherToCourseDAO {
+func (storage *DbStorage) TeacherToCourseDAO() TeacherToCourseDAO {
 	return storage.teacherToCourseDAO
 }
 
-func (storage *Storage) StudentToCourseDAO() *StudentToCourseDAO {
+func (storage *DbStorage) StudentToCourseDAO() StudentToCourseDAO {
 	return storage.studentToCourseDAO
 }

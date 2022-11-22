@@ -20,7 +20,7 @@ func HandleProfilesGet(request *GetRequest, context *dependency.DependencyContex
 		return http.StatusOK, &GetResponse{}
 	}
 	profiles, err := context.Storage.UserAvatarDAO().GetProfileById(request.ProfileIds)
-	if err != nil {
+	if err != nil || len(profiles) != len(request.ProfileIds) {
 		return http.StatusBadRequest, &GetResponse{}
 	}
 

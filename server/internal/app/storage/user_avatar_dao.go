@@ -23,7 +23,7 @@ func (dao *userAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, 
 		strProfileIds = append(strProfileIds, strconv.Itoa(int(val)))
 	}
 	rows, err := dao.Storage.Db.Query(
-		fmt.Sprintf(`SELECT profile_id, avatar_url, first_name, last_name
+		fmt.Sprintf(`SELECT profile_id, avatar_url
 		FROM user_avatar_base
 		WHERE profile_id IN (%s)`, strings.Join(strProfileIds, ", ")))
 	if err != nil {
@@ -36,9 +36,7 @@ func (dao *userAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, 
 	for rows.Next() {
 		var profile models.Profile
 		if err := rows.Scan(&profile.ProfileId,
-			&profile.AvatarUrl,
-			&profile.FirstName,
-			&profile.LastName); err != nil {
+			&profile.AvatarUrl); err != nil {
 			return nil, err
 		}
 		profiles = append(profiles, profile)
@@ -49,13 +47,11 @@ func (dao *userAvatarDAO) GetProfileById(profileIds []int32) ([]models.Profile, 
 
 func (dao *userAvatarDAO) UpdateProfile(profile models.Profile) error {
 	_, err := dao.Storage.Db.Exec(`INSERT INTO
-			   user_avatar_base (profile_id, avatar_url, first_name, last_name)
-		       VALUES ($1, $2, $3, $4)
+			   user_avatar_base (profile_id, avatar_url)
+		       VALUES ($1, $2)
 		       ON CONFLICT (profile_id) DO UPDATE SET avatar_url = EXCLUDED.avatar_url`,
 		profile.ProfileId,
 		profile.AvatarUrl,
-		profile.FirstName,
-		profile.LastName,
 	)
 	return err
 }

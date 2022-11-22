@@ -44,8 +44,6 @@ func handleProfilesLoadImage(request *LoadImageRequest, context *dependency.Depe
 	err = context.Storage.UserAvatarDAO().UpdateProfile(models.Profile{
 		ProfileId: user.ProfileId,
 		AvatarUrl: absoluteUrl,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
 	})
 
 	if err != nil {

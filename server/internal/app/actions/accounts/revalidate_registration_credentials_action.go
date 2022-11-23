@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"net/http"
 	"strconv"
 	"time"
@@ -52,8 +53,8 @@ func HandleAccountsRevalidateRegistrationCredentials(request *RevalidateRegistra
 			)
 
 			go func() {
-				err := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode, user.FirstName,
-					user.LastName))
+				err := context.EventQueue.AddMessage("Email", models.BuildMessage(verificationCode, user.FirstName,
+					user.LastName, []string{user.Email}))
 				if err != nil {
 					context.Logger.Debugf("RevalidateRegistrationCredentials: can't send email to %s, %s", user.Email, err)
 				}

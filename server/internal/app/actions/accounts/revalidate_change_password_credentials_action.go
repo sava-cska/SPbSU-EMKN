@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"fmt"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"net/http"
 	"strconv"
 	"time"
@@ -51,8 +52,8 @@ func HandleAccountsRevalidateChangePasswordCredentials(request *RevalidateChange
 	context.Logger.Debugf("RevalidateChangePasswordCredentials: find user with login = %s and email = %s", user.Login, user.Email)
 
 	go func() {
-		if errEmail := context.Mailer.SendEmail([]string{user.Email}, notifier.BuildMessage(verificationCode,
-			user.FirstName, user.LastName)); errEmail != nil {
+		if errEmail := context.EventQueue.AddMessage("Email", models.BuildMessage(verificationCode,
+			user.FirstName, user.LastName, []string{user.Email})); errEmail != nil {
 			context.Logger.Errorf("RevalidateChangePasswordCredentials: can't send email to %s, %s", user.Email, errEmail)
 		}
 	}()

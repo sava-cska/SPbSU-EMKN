@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/pwd_hasher"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage/test_storage"
 	"github.com/stretchr/testify/assert"
@@ -76,7 +75,7 @@ func registerUser(user *models.User, server *TestServer, db *test_storage.TestDA
 	return true, addedUser.ProfileId
 }
 
-func parseVerificationCode(msg *notifier.Message) string {
+func parseVerificationCode(msg *models.Message) string {
 	subs := "Код подтверждения: <b>"
 	ind := strings.Index(msg.Body, subs) + len(subs)
 	verificationCode := msg.Body[ind : ind+6]

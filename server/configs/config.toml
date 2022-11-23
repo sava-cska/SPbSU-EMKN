@@ -7,3 +7,7 @@ database_url = "host=localhost dbname=postgres sslmode=disable"
 [NotifierConfig]
 mailer_daemon = "smtp.yandex.ru"
 mailer_daemon_port = 25
+
+[EventQueueConfig]
+event_queue_port = "5672"
+event_queue_address = "51.250.98.212"

@@ -39,6 +39,9 @@ func main() {
 	config.StorageConfig.Auth(psqlUser, psqlPassword)
 
 	s := core.New(config)
+	go func() {
+		loop(config.NotifierConfig, config.EventQueueConfig)
+	}()
 	if err := s.Start(); err != nil {
 		log.Fatal(err)
 	}

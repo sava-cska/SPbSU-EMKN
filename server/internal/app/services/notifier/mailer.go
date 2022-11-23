@@ -3,13 +3,14 @@ package notifier
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"net/smtp"
 	"strconv"
 	"strings"
 )
 
 type Mailer interface {
-	SendEmail(receivers []string, message Message) error
+	SendEmail(message models.Message) error
 }
 
 type mailerImpl struct {
@@ -26,7 +27,7 @@ func New(config *Config, EmknCourseMail, EmknCoursePassword string) Mailer {
 	}
 }
 
-func (mailer mailerImpl) SendEmail(receivers []string, message Message) error {
+func (mailer mailerImpl) SendEmail(message models.Message) error {
 	msg := fmt.Sprintf(`From: %s
 Subject: %s
 Content-Type: text/html; charset="UTF-8"
@@ -39,7 +40,7 @@ Content-Transfer-Encoding: base64
 	return smtp.SendMail(mailer.getMailerDaemon(),
 		mailer.auth,
 		mailer.sender,
-		receivers,
+		message.Receivers,
 		[]byte(msg))
 }
 

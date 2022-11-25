@@ -82,8 +82,8 @@ func HandleAccountsRegister(request *RegisterRequest, context *dependency.Depend
 		)
 
 		go func() {
-			if err := context.Mailer.SendEmail([]string{request.Email}, notifier.BuildMessage(verificationCode,
-				request.FirstName, request.LastName)); err != nil {
+			if err := context.EventQueue.AddMessage("Email", models.BuildMessage(verificationCode,
+				request.FirstName, request.LastName, []string{request.Email})); err != nil {
 				context.Logger.Errorf("Register: can't send email to %s, %s", request.Email, err)
 			}
 		}()

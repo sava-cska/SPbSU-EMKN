@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"net/http"
 	"strconv"
 	"time"
@@ -38,9 +39,9 @@ func HandleAccountsBeginChangePassword(request *BeginChangePasswordRequest,
 	context.Logger.Debugf("BeginChangePassword: token = %s, verificationCode = %s", token, verificationCode)
 
 	go func() {
-		if errEmail := context.Mailer.SendEmail([]string{request.Email}, notifier.BuildMessage(verificationCode,
-			user.FirstName, user.LastName)); errEmail != nil {
-			context.Logger.Errorf("BeginChangePassword: can't send email to %s, %s", request.Email, errEmail)
+		if err := context.EventQueue.AddMessage("Email", models.BuildMessage(verificationCode,
+			user.FirstName, user.LastName, []string{request.Email})); err != nil {
+			context.Logger.Errorf("BeginChangePassword: can't send email to %s", request.Email)
 		}
 	}()
 

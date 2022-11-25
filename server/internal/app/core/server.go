@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/event_queue"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"math/rand"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/notifier"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sirupsen/logrus"
 )
@@ -36,8 +36,8 @@ func New(config *Config) *Server {
 
 func (server *Server) Start() error {
 	rand.Seed(time.Now().UnixNano())
-	EmknCourseMail := os.Getenv("EMKN_COURSE_MAIL")
-	EmknCoursePassword := os.Getenv("EMKN_COURSE_PASSWORD")
+	rabbitLogin := os.Getenv("RABBIT_LOGIN")
+	rabbitPassword := os.Getenv("RABBIT_PASSWORD")
 
 	if err := server.configureLogger(); err != nil {
 		return err
@@ -45,7 +45,9 @@ func (server *Server) Start() error {
 	if err := server.configureStorage(); err != nil {
 		return err
 	}
-	server.configureMailing(EmknCourseMail, EmknCoursePassword)
+	if err := server.configureQueue(rabbitLogin, rabbitPassword); err != nil {
+		return err
+	}
 
 	// important to have configured other entities before configure router
 	server.configureRouter()
@@ -79,9 +81,10 @@ func (server *Server) configureStorage() error {
 	return nil
 }
 
-func (server *Server) configureMailing(EmknCourseMail, EmknCoursePassword string) {
-	mailer := notifier.New(server.config.NotifierConfig, EmknCourseMail, EmknCoursePassword)
-	server.context.Mailer = mailer
+func (server *Server) configureQueue(rabbitLogin, rabbitPassword string) error {
+	queue, err := event_queue.New(server.config.EventQueueConfig, rabbitLogin, rabbitPassword)
+	server.context.EventQueue = queue
+	return err
 }
 
 func (server *Server) configureRouter() {

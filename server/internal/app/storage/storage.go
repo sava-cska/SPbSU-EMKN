@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
 
@@ -15,6 +16,9 @@ type Storage interface {
 	PeriodDAO() PeriodDAO
 	TeacherToCourseDAO() TeacherToCourseDAO
 	StudentToCourseDAO() StudentToCourseDAO
+	HomeworkDAO() HomeworkDAO
+	PassedHomeworkDAO() PassedHomeworkDAO
+	CheckedHomeworkDAO() CheckedHomeworkDAO
 }
 
 type DbStorage struct {
@@ -29,6 +33,9 @@ type DbStorage struct {
 	periodDAO          PeriodDAO
 	teacherToCourseDAO TeacherToCourseDAO
 	studentToCourseDAO StudentToCourseDAO
+	homeworkDAO        HomeworkDAO
+	passedHomeworkDAO  PassedHomeworkDAO
+	checkedHomeworkDAO CheckedHomeworkDAO
 }
 
 func New(config *Config) *DbStorage {
@@ -44,6 +51,9 @@ func New(config *Config) *DbStorage {
 	s.periodDAO = &periodDAO{s}
 	s.teacherToCourseDAO = &teacherToCourseDAO{s}
 	s.studentToCourseDAO = &studentToCourseDAO{s}
+	s.homeworkDAO = &homeworkDAO{s}
+	s.passedHomeworkDAO = &passedHomeworkDAO{s}
+	s.checkedHomeworkDAO = &checkedHomeworkDAO{s}
 	return s
 }
 
@@ -93,4 +103,16 @@ func (storage *DbStorage) TeacherToCourseDAO() TeacherToCourseDAO {
 
 func (storage *DbStorage) StudentToCourseDAO() StudentToCourseDAO {
 	return storage.studentToCourseDAO
+}
+
+func (storage *DbStorage) HomeworkDAO() HomeworkDAO {
+	return storage.homeworkDAO
+}
+
+func (storage *DbStorage) PassedHomeworkDAO() PassedHomeworkDAO {
+	return storage.passedHomeworkDAO
+}
+
+func (storage *DbStorage) CheckedHomeworkDAO() CheckedHomeworkDAO {
+	return storage.checkedHomeworkDAO
 }

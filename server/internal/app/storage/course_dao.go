@@ -43,7 +43,7 @@ func (dao *courseDAO) GetPeriods() ([]*models.Period, error) {
 
 func (dao *courseDAO) GetDescription(courseId uint32) (*string, error) {
 	res := dao.Storage.Db.QueryRow(
-		`SELECT short_description
+		`SELECT full_description
                FROM course_base
                WHERE id = $1`,
 		courseId,

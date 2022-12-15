@@ -1,12 +1,12 @@
 package core
 
 import (
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/event_queue"
-	httpSwagger "github.com/swaggo/http-swagger"
 	"math/rand"
 	"net/http"
 	"os"
 	"time"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/gorilla/mux"
 	_ "github.com/sava-cska/SPbSU-EMKN/docs"
@@ -15,6 +15,7 @@ import (
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/courses"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/actions/profiles"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/core/dependency"
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/services/event_queue"
 	"github.com/sava-cska/SPbSU-EMKN/internal/app/storage"
 	"github.com/sirupsen/logrus"
 )
@@ -106,4 +107,5 @@ func (server *Server) configureRouter() {
 	base.HandleActionWithAuth("/courses/list", courses.HandleCoursesList, server.context)
 	base.HandleActionWithAuth("/courses/enroll", courses.HandleCoursesEnroll, server.context)
 	base.HandleActionWithAuth("/courses/unenroll", courses.HandleCoursesUnEnroll, server.context)
+	base.HandleActionWithAuth("/courses/get_homeworks", courses.HandleCoursesGetHomeworks, server.context)
 }

@@ -57,3 +57,15 @@ func (storage *TestStorage) TeacherToCourseDAO() storage.TeacherToCourseDAO {
 func (storage *TestStorage) StudentToCourseDAO() storage.StudentToCourseDAO {
 	return storage.dao
 }
+
+func (storage *TestStorage) HomeworkDAO() storage.HomeworkDAO {
+	return storage.dao
+}
+
+func (storage *TestStorage) PassedHomeworkDAO() storage.PassedHomeworkDAO {
+	return storage.dao
+}
+
+func (storage *TestStorage) CheckedHomeworkDAO() storage.CheckedHomeworkDAO {
+	return storage.dao
+}

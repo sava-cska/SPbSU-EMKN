@@ -36,7 +36,7 @@ func HandleCoursesEnroll(request *EnrollRequest, context *dependency.DependencyC
 
 	exist, errExist := context.Storage.CourseDAO().ExistCourse(request.CourseId)
 	if errExist != nil {
-		context.Logger.Errorf("Enroll: error in checking existence %d in course_base", request.CourseId)
+		context.Logger.Errorf("Enroll: error in checking existence %d in course_base, %s", request.CourseId, errExist)
 		return http.StatusInternalServerError, &EnrollResponse{}
 	}
 	if !exist {
@@ -46,8 +46,8 @@ func HandleCoursesEnroll(request *EnrollRequest, context *dependency.DependencyC
 
 	exist, err := context.Storage.StudentToCourseDAO().ExistRecord(user.ProfileId, request.CourseId)
 	if err != nil {
-		context.Logger.Errorf("Enroll: error in checking existence (%d, %d) in student_to_course_base",
-			user.ProfileId, request.CourseId)
+		context.Logger.Errorf("Enroll: error in checking existence (%d, %d) in student_to_course_base, %s",
+			user.ProfileId, request.CourseId, err)
 		return http.StatusInternalServerError, &EnrollResponse{}
 	}
 	if exist {
@@ -56,7 +56,7 @@ func HandleCoursesEnroll(request *EnrollRequest, context *dependency.DependencyC
 	}
 
 	if errAdd := context.Storage.StudentToCourseDAO().AddRecord(user.ProfileId, request.CourseId); errAdd != nil {
-		context.Logger.Errorf("Enroll: error in adding (%d, %d) into student_to_course_base", user.ProfileId, request.CourseId)
+		context.Logger.Errorf("Enroll: error in adding (%d, %d) into student_to_course_base, %s", user.ProfileId, request.CourseId, errAdd)
 		return http.StatusInternalServerError, &EnrollResponse{}
 	}
 

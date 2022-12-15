@@ -2,9 +2,15 @@ package test_storage
 
 import (
 	"errors"
-	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 	"time"
+
+	"github.com/sava-cska/SPbSU-EMKN/internal/app/models"
 )
+
+type UserAndHomeworkId struct {
+	UserId     uint32
+	HomeworkId uint32
+}
 
 type TestDAO struct {
 	LoginToUser           map[string]*models.User
@@ -14,6 +20,9 @@ type TestDAO struct {
 	Courses               map[uint32]*TestCourseData
 	TokenToChangePassword map[string]*TestChangePasswordData
 	UserAvatars           map[uint32]*models.Profile
+	Homeworks             map[uint32]*models.HomeworkInDB
+	PassedHomeworks       map[UserAndHomeworkId]bool
+	CheckedHomeworks      map[UserAndHomeworkId]int
 }
 
 func (dao *TestDAO) AddNewUser(id uint32, login string, passwd string, email string, fname string, lname string) {
@@ -326,4 +335,32 @@ func (dao *TestDAO) GetTeachersByCourse(courseId uint32) ([]uint32, error) {
 		teachers = append(teachers, tid)
 	}
 	return teachers, nil
+}
+
+func (dao *TestDAO) GetAllHomeworks(courseId uint32) ([]models.HomeworkInDB, error) {
+	var result []models.HomeworkInDB
+	for _, homework := range dao.Homeworks {
+		if homework.CourseId == courseId {
+			result = append(result, *homework)
+		}
+	}
+	return result, nil
+}
+
+func (dao *TestDAO) CheckUserPassHomework(userId uint32, homeworkId uint32) (bool, error) {
+	_, exist := dao.PassedHomeworks[UserAndHomeworkId{UserId: userId, HomeworkId: homeworkId}]
+	if exist {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+func (dao *TestDAO) ScoreForHomework(userId uint32, homeworkId uint32) (bool, int, error) {
+	score, exist := dao.CheckedHomeworks[UserAndHomeworkId{UserId: userId, HomeworkId: homeworkId}]
+	if exist {
+		return true, score, nil
+	} else {
+		return false, 0, nil
+	}
 }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/user_graph"
+    app:startDestination="@id/coursesFragment">
+
+    <fragment
+        android:id="@+id/tasksFragment"
+        android:name="com.mcs.emkn.ui.tasks.TasksFragment"
+        android:label="TasksFragment" />
+
+    <fragment
+        android:id="@+id/coursesFragment"
+        android:name="com.mcs.emkn.ui.courses.CoursesFragment"
+        android:label="CoursesFragment">
+
+        <action
+            android:id="@+id/action_CoursesFragment_to_ProfileFragment"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_coursesFragment_to_coursePageFragment"
+            app:destination="@id/coursePageFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.mcs.emkn.ui.profile.viewmodels.ProfileFragment"
+        android:label="ProfileFragment" />
+    <fragment
+        android:id="@+id/coursePageFragment"
+        android:name="com.mcs.emkn.ui.coursepage.CoursePageFragment"
+        android:label="CoursePageFragment" >
+        <action
+            android:id="@+id/action_coursePageFragment_to_courseHomeworksFragment"
+            app:destination="@id/courseHomeworksFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseHomeworksFragment"
+        android:name="com.mcs.emkn.ui.coursehomeworks.CourseHomeworksFragment"
+        android:label="CourseHomeworksFragment" />
+</navigation>

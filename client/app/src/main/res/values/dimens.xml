@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="verification_code_slot_corner_radius">10dp</dimen>
+    <dimen name="verification_code_slot_width">48dp</dimen>
+    <dimen name="verification_code_slot_height">56dp</dimen>
+    <dimen name="emkn_logo_top_margin">83dp</dimen>
+    <dimen name="auth_tab_horizontal_padding">30dp</dimen>
+    <dimen name="auth_screen_horizontal_margin">28dp</dimen>
+    <dimen name="courses_items_offset">16dp</dimen>
+    <dimen name="course_page_items_offset">32dp</dimen>
+</resources>

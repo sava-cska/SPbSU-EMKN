@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/registration_graph"
+    app:startDestination="@id/authFragment">
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="com.mcs.emkn.ui.auth.AuthFragment"
+        android:label="AuthFragment">
+        <action
+            android:id="@+id/action_authFragment_to_emailConfirmationFragment"
+            app:destination="@id/emailConfirmationFragment" />
+        <action
+            android:id="@+id/action_authFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/emailConfirmationFragment"
+        android:name="com.mcs.emkn.ui.emailconfirmation.EmailConfirmationFragment"
+        android:label="EmailConfirmationFragment" />
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.mcs.emkn.ui.changepassword.ForgotPasswordFragment"
+        android:label="ForgotPasswordFragment">
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_changePasswordConfirmationFragment"
+            app:destination="@id/changePasswordConfirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/changePasswordConfirmationFragment"
+        android:name="com.mcs.emkn.ui.changepassword.ChangePasswordConfirmationFragment"
+        android:label="ChangePasswordConfirmationFragment">
+        <action
+            android:id="@+id/action_changePasswordConfirmationFragment_to_commitChangePasswordFragment"
+            app:destination="@id/commitChangePasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/commitChangePasswordFragment"
+        android:name="com.mcs.emkn.ui.changepassword.CommitChangePasswordFragment"
+        android:label="CommitChangePasswordFragment" />
+</navigation>

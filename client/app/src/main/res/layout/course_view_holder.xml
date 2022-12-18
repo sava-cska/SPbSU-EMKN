@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/course_view_holder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/course_background"
+    android:clipChildren="false"
+    android:paddingHorizontal="20dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:id="@+id/courseName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text"
+        android:textFontWeight="700"
+        android:textSize="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Математический анализ" />
+
+    <TextView
+        android:id="@+id/lector"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:drawableStart="@drawable/person_icon"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/confirm"
+        android:textFontWeight="600"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toStartOf="@id/enrollButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/courseName"
+        tools:text="Фёдор Бахарев" />
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/text"
+        android:textFontWeight="500"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lector"
+        tools:text="Я вас любил любовь еще быть может в моей душе угасла несовсем Я вас любил любовь еще быть может в моей душе угасла несовсем Я вас любил любовь еще быть может в моей душе угасла несовсем" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/enrollButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/confirm_background"
+        android:minHeight="0dp"
+        android:paddingHorizontal="8dp"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/courseName"
+        tools:text="Записаться" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

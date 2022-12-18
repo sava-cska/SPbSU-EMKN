@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/courses_settings"
+    android:layout_width="262dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/courses_settings_background"
+    android:paddingHorizontal="21dp"
+    android:paddingBottom="4dp"
+    android:visibility="gone">
+
+    <CheckBox
+        android:id="@+id/excludeEnrolled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/exclude_enroll_courses"
+        android:textColor="@color/text_reversed"
+        android:textSize="13dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/excludeUnenrolled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/exclude_unenrolled_courses"
+        android:textColor="@color/text_reversed"
+        android:textSize="13dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/excludeEnrolled" />
+
+    <Spinner
+        android:id="@+id/periodChooser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:spinnerMode="dropdown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/excludeUnenrolled" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/coursesPeriodLoader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/text_reversed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/excludeUnenrolled" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

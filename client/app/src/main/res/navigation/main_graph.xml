@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/startPageFragment">
+
+    <action
+        android:id="@+id/action_registrationNavGraph"
+        app:destination="@+id/registration_graph"
+        app:popUpTo="@+id/main_graph"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_userNavGraph"
+        app:destination="@+id/user_graph"
+        app:popUpTo="@+id/main_graph"
+        app:popUpToInclusive="true" />
+
+    <include app:graph="@navigation/registration_graph" />
+
+    <include app:graph="@navigation/user_graph" />
+
+    <fragment
+        android:id="@+id/startPageFragment"
+        android:name="com.mcs.emkn.ui.startpage.StartPageFragment"
+        android:label="StartPageFragment" />
+
+</navigation>

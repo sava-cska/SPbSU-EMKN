@@ -1,0 +1,23 @@
+pluginManagement {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'https://jitpack.io'
+        }
+        gradlePluginPortal()
+        google()
+    }
+}
+dependencyResolutionManagement {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://jitpack.io'
+        }
+        mavenCentral()
+        google()
+    }
+}
+rootProject.name = "emkn"
+include ':app'

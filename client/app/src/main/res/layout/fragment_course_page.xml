@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/course_page_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/headerBackground"
+        android:layout_width="match_parent"
+        android:layout_height="131dp"
+        android:background="@drawable/course_page_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/courses_title"
+        android:textColor="@color/text_reversed"
+        android:textSize="32dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/coursePageRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:overScrollMode="never"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="24dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerBackground"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/home_works_buttton"
+        android:layout_width="152dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/home_works_button"
+        android:gravity="start|center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="24dp"
+        android:textColor="@color/white"
+        android:text="домашние задания"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headerBackground" />
+
+    <ImageButton
+        android:id="@+id/home_works__button_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:background="@null"
+        app:layout_constraintBottom_toBottomOf="@id/home_works_buttton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/home_works_buttton"
+        app:srcCompat="@drawable/white_arrow_right" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

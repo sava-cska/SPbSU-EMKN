@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/course_view_holder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/course_background"
+    android:clipChildren="false"
+    android:paddingBottom="16dp">
+
+    <TextView
+        android:id="@+id/homework_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textColor="@color/text"
+        android:textFontWeight="700"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Лабораторная работа №1 \nФурье" />
+
+    <TextView
+        android:id="@+id/date_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text"
+        android:textFontWeight="600"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/homework_title"
+        tools:text="06 октября" />
+
+    <TextView
+        android:id="@+id/time_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text"
+        android:textFontWeight="500"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="@id/date_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_text"
+        tools:text="23:59" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/homework_status_background"
+        android:minHeight="0dp"
+        android:paddingHorizontal="8dp"
+        android:textSize="15dp"
+        android:textColor="@color/text"
+        app:layout_constraintBottom_toBottomOf="@id/time_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/date_text"
+        tools:text="не проверено" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
